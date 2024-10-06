@@ -1,0 +1,3 @@
+[submodule "smartcontract/lib/account-abstraction"]
+	path = smartcontract/lib/account-abstraction
+	url = https://github.com/eth-infinitism/account-abstraction
