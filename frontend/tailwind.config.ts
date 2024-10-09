@@ -82,10 +82,17 @@ const config: Config = {
             height: '0',
           },
         },
+        // added scroll effect for marquee
+        scroll:{
+          '0%':{transform: 'translateX(100%)'},
+          '100%':{transform: 'translateX(-100%)'},
+        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        //added scroll animation for marquee
+        scroll:'scroll 15s linear infinite'
       },
     },
   },

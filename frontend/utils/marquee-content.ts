@@ -1,0 +1,2 @@
+
+export const marqueeList = ['Effortless staking,steady rewards', 'Hassel free onboarding', 'Phrase free protection', 'Seamless protection, zero friction', 'fortify your assets', 'Access to pool', 'Onchain assets coverage']
