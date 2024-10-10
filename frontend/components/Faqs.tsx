@@ -31,7 +31,7 @@ export function Faqs() {
   ];
 
   return (
-    <section className="bg-gray-50 p-20">
+    <section className="bg-[#F1F1F3] p-20">
       <div className="flex justify-between">
         <h2 className="text-3xl font-serif font-bold text-[#302B63] mb-8">FAQs</h2>
         <div>

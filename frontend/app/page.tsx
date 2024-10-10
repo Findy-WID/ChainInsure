@@ -4,7 +4,7 @@ import { Features } from '@/components/Features'
 import { Footer } from '@/components/Footer'
 import { Info } from '@/components/Info'
 import { Faqs } from '../components/Faqs'
-
+import { WaitList } from '@/components/WaitList'
 
 
 export default function Home() {
@@ -16,6 +16,7 @@ export default function Home() {
         <Features />
         <Info/>
         <Faqs/>
+        <WaitList/>
       </main>
       <Footer />
     </div>
