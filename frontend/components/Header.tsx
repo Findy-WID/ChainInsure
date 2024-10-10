@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ShieldCheck, ArrowRight } from 'lucide-react'
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import { Button } from "@/components/ui/button"
+import Image from 'next/image'
 
 
 export function Header() {
@@ -22,7 +23,7 @@ export function Header() {
   }, [])
 
   return (
-    <header className={`fixed bg-[#15173033] w-full transition-all duration-300 ${isScrolled ? 'bg-white/80 backdrop-blur-md shadow-md' : ''}`}>
+    <header className={`fixed z-50 bg-[#15173033] w-full transition-all duration-300 ${isScrolled ? 'bg-white/80 backdrop-blur-md shadow-md' : ''}`}>
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
 
         <nav className="hidden md:flex space-x-8">
@@ -37,12 +38,15 @@ export function Header() {
         </Link>
 
         <div className='flex justify-between'>
-        <Button className='bg-slate-600 rounded-full text-white mr-4'>Get the app <ArrowRight className='ml-2 self-center'/></Button>
+        <Button className='bg-slate-600 rounded-full text-white mr-4'>Get the app <Image src="/images/arrow-right-sharp.svg" alt="arrow right" 
+            height={32}
+            width={32}
+            className='h-8 w-8 ml-2 self-center'/></Button>
         
         {isConnected ? (
-          <Button className = 'bg-white text-black rounded-full' onClick={() => disconnect()}>Disconnect</Button>
+          <Button className = 'bg-white text-black rounded-full hover:bg-blue-600 hover:text-white' onClick={() => disconnect()}>Disconnect</Button>
         ) : (
-          <Button className = 'bg-white text-black rounded-full' onClick={() => connect({ connector: connectors[0] })}>Connect wallet</Button>
+          <Button className = 'bg-white text-black rounded-full hover:bg-blue-600 hover:text-white' onClick={() => connect({ connector: connectors[0] })}>Connect wallet</Button>
         )}
         </div>
 
