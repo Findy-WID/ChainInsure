@@ -1,24 +1,62 @@
-import { ShieldCheck } from 'lucide-react'
 
-export function Footer() {
+import Image from "next/image"
+
+const icons = [
+  {icon:'github', src:'/images/github.svg'},
+  {icon:'discord', src:'/images/discord.svg'},
+  {icon:'telegram', src:'/images/telegram.svg'},
+  {icon:'twitter', src:'/images/twitter.svg'}
+]
+
+export function Footer () {
   return (
-    <footer className="bg-gray-800 text-white py-12">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-center">
-          <div className="flex items-center mb-4 md:mb-0">
-            <ShieldCheck className="h-8 w-8 text-blue-400 mr-2" />
-            <span className="text-2xl font-serif font-bold">Chain Insure</span>
-          </div>
-          <nav className="flex flex-wrap justify-center md:justify-end space-x-6">
-            <a href="#" className="hover:text-blue-400">Privacy Policy</a>
-            <a href="#" className="hover:text-blue-400">Terms of Service</a>
-            <a href="#" className="hover:text-blue-400">Contact Us</a>
-          </nav>
+    <footer className="bg-[#0C0E1A] text-white pt-12">
+      <div className="flex flex-col md:flex-row justify-between mx-auto px-8">
+        <div className="flex flex-col space-y-4 ">
+          <h1 className="text-3xl">Chain Insure</h1>
+          <p className="text-sm w-2/5 text-[#ACACB8]">
+          A base platform providing onchain insurance for digital assets against wallet hacks and staking on ETH/USDT  liquidity pools to earn high APY
+          </p>
         </div>
-        <div className="mt-8 text-center text-gray-400">
-          © {new Date().getFullYear()} Chain Insure. All rights reserved.
+
+        <nav className="flex justify-between space-x-10">
+          <div className='flex flex-col space-y-2'>
+            <h1 className="text-xl">Company</h1>
+            <a href="#" className="text-[#ACACB8] hover:text-blue-400">Documentation</a>
+            <a href="#" className="text-[#ACACB8] hover:text-blue-400">Blog</a>
+            <a href="#" className="text-[#ACACB8] hover:text-blue-400">About us</a>
+
+          </div>
+          <div className='flex text-nowrap flex-col space-y-2'>
+            <h1 className="text-xl">Legal</h1>
+            <a href="#" className="text-[#ACACB8] whitespace-nowrap hover:text-blue-400">Privacy policy</a>
+            <a href="#" className="text-[#ACACB8] hover:text-blue-400">Terms of use</a>
+            
+
+          </div>
+
+          <div className='flex flex-col space-y-2'>
+            <h1 className="text-xl">Support</h1>
+            <a href="#" className="text-[#ACACB8] whitespace-nowrap hover:text-blue-400">Help center</a>
+            <a href="#" className="text-[#ACACB8] hover:text-blue-400">Contact us</a>
+            
+
+          </div>
+        </nav>
+      </div>
+      <div className='flex flex-row justify-between items-center mx-auto px-8 mt-16 border-b border-1 border-[#4D4F6F] pb-6'>
+        <p className="text-sm text-left text-[#ACACB8] ">Copyright 2024 ChainInsure All Rights Reserved</p>
+
+        <div className="flex flex-row space-x-4 text-right">
+          {icons.map((icon, index)=>{
+            return <a href="#" key={index}className="group">
+              <div className="transition-opacity duration-300 group-hover:opacity-75"><Image src={icon.src} alt={icon.icon} height={24} width={24}/></div>
+              </a>
+          })}
         </div>
       </div>
+
+      <div className="h-32 w-full mt-16 bg-center bg-[url('/images/chain-insure.svg')]"></div>
     </footer>
   )
 }
