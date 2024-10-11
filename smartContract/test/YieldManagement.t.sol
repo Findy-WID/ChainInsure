@@ -6,13 +6,13 @@ import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol"
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 import {CustomTest} from "./helpers/CustomTest.t.sol";
-import {Test, console} from "../lib/forge-std/src/Test.sol";
+import {Test, console} from "forge-std/Test.sol";
 
-import {DeployYieldManager} from "../script/DeployYieldManagement.s.sol";
+import {DeployYieldManager} from "../scripts/DeployYieldManagement.s.sol";
+import {InsuranceManager} from "../contracts/InsurancePolicy.sol";
 import {MockPool} from "../contracts/mocks/MockPool.sol";
-import {SampleERC20} from "../contracts/mocks/SampleERC20.sol";
-import {YieldManager} from "../contracts/YieldManager.sol";
-
+import {SampleERC20} from "../../contracts/mocks/SampleERC20.sol";
+import {YieldManager} from "../../contracts/YieldManager.sol";
 
 contract YieldManagerTest is Test, CustomTest {
     DeployYieldManager.YieldManagerArgs public args;
@@ -94,8 +94,8 @@ contract YieldManagerTest is Test, CustomTest {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
-                nonManagerContract_
-                // yieldManager.MANAGER_CONTRACT()
+                nonManagerContract_,
+                yieldManager.MANAGER_CONTRACT()
             )
         );
         yieldManager.deposit(amount_);

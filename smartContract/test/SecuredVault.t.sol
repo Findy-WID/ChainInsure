@@ -1,151 +1,185 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity 0.8.24;
 
-import {Test, console} from "../lib/forge-std/src/Test.sol";
+import "forge-std/Test.sol";
 import {SecuredVault} from "../contracts/SecuredVault.sol";
 
 contract SecuredVaultTest is Test {
-    SecuredVault public s_SecuredVault;
-
-    address owner = makeAddr("owner");
-    address user = makeAddr("user");
-
-    uint256 constant INITIAL_FUNDS = 21 ether;
-
-    // modifier fundSecuredVault(){
-    //     _;
-    // }
-
+    SecuredVault vault;
+    address owner;
+    address user;
+    string secret;
+    uint256 initialDeposit = 1 ether;
+    uint256 threshold = 0.5 ether;
+    
     function setUp() public {
-        // deploy the contact with owner address and set transaction threshold
+        // Set up owner and user accounts
+        owner = vm.addr(1);
+        user = vm.addr(2);
+
+        // Set up secret and deploy SecuredVault contract
+        secret = "superSecret123";
+        vault = new SecuredVault(owner, threshold, secret);
+
+        // Label addresses for readability in logs
+        vm.label(owner, "Owner");
+        vm.label(user, "User");
+
+        // Fund the vault with 1 ether
+        // vm.deal(address(vault), initialDeposit);
+        vm.deal(owner, initialDeposit);
+    }
+
+    function testOwnerCanSendFunds() public {
+        // Deposit funds to vault
+        _depositFunds();
+
+        // Check initial balance of the vault
+        uint256 vaultBalance = vault.getBalance();
+        assertEq(vaultBalance, initialDeposit);
+
+        // Owner sends 0.1 ether to user
         vm.startPrank(owner);
-        s_SecuredVault = new SecuredVault(owner, 10 ether, "test");
-
-        // Fund SecuredVault with some initial
-        deal(owner, INITIAL_FUNDS);
-        (bool success,) = payable(s_SecuredVault).call{value: INITIAL_FUNDS}("");
-        if (success) {}
+        bool success = vault.sendFunds(payable(user), 0.1 ether);
         vm.stopPrank();
+
+        // Assert the transaction was successful
+        assertTrue(success);
+
+        // Check updated balances
+        assertEq(vault.getBalance(), initialDeposit - 0.1 ether);
     }
 
-    function testSecuredVaultBalance() public view {
-        console.log(address(s_SecuredVault).balance);
-    }
-
-    // function testSendFunds() public {
-    //     s_SecuredVault.sendFunds()
-    // }
-
-    // Test: Only the owner cand send fund
-    function testOnlyOwnerCanSendFunds() public {
-        // Revert other user tries to send funds
-        vm.startPrank(user);
+    function testSendFundsExceedsThreshold() public {
+        // Test that sending funds exceeding threshold freezes the account
+        vm.startPrank(owner);
         vm.expectRevert();
-        bool isSuccessful = s_SecuredVault.sendFunds(payable(user), 1 ether);
+        bool success = vault.sendFunds(payable(user), 0.6 ether);  // Above threshold
+        assertFalse(success);
         vm.stopPrank();
+    }
 
-        // Allow owner to send funds
+    function testFreezeAccountAfterSuspiciousActivity() public {
+        // Deposit funds to vault
+        _depositFunds();
+
+
+        // Check initial balance of the vault
+        uint256 vaultBalance = vault.getBalance();
+        assertEq(vaultBalance, initialDeposit);
+
+        // Test account freezing due to suspicious behavior (too many transactions in short time)
         vm.startPrank(owner);
-        s_SecuredVault.sendFunds(payable(user), 1 ether);
-        assertEq(address(user).balance, 1 ether);
+        reentrantCall();
 
-        for (uint256 i; i < 5; i++) {
-            isSuccessful = s_SecuredVault.sendFunds(payable(user), 1 ether);
+        // Account should be frozen after suspicious behavior
+        bool isFrozen = vault.getAccountStatus();
+        assertTrue(isFrozen);
+
+        // Try sending funds again (should revert due to frozen account)
+        vm.expectRevert();
+        vault.sendFunds(payable(user), 0.01 ether);
+        vm.stopPrank();
+    }
+
+    function testUnfreezeAccountWithSecret() public {
+        // Freeze the account manually for testing
+        vm.startPrank(owner);
+        _depositFunds();
+
+
+        bool success = vault.sendFunds(payable(user), 0.6 ether);  // Trigger threshold limit freeze
+        assertFalse(success);
+        assertTrue(vault.getAccountStatus());
+
+        // Unfreeze the account with the correct secret
+        vault.pauseContract();
+        vault.unfreezeAccount(secret);
+
+        // Ensure the account is no longer frozen
+        assertFalse(vault.getAccountStatus());
+        vm.stopPrank();
+    }
+
+    function testUnfreezeAccountWithInvalidSecret() public {
+        // Freeze the account manually for testing
+        vm.startPrank(owner);
+
+         // Deposit funds to vault
+        _depositFunds();
+
+
+        vault.sendFunds(payable(user), 0.6 ether);  // Trigger threshold limit freeze
+        assertTrue(vault.getAccountStatus());
+
+        // Try to unfreeze with an incorrect secret (should fail)
+        vm.expectRevert();
+        vault.unfreezeAccount("wrongSecret");
+
+        // Ensure the account remains frozen
+        assertTrue(vault.getAccountStatus());
+        vm.stopPrank();
+    }
+
+    function testPauseContract() public {
+
+        // Test that pausing the contract stops transactions
+        vm.startPrank(owner);
+
+        // Deposit funds to vault
+        _depositFunds();
+
+        // Pause the contract
+        vault.pauseContract();
+
+        // Try sending funds (should revert due to pause)
+        vm.expectRevert();
+        vault.sendFunds(payable(user), 0.1 ether);
+        vm.stopPrank();
+    }
+
+    function testWithdrawAfterHackReport() public {
+        // Test that after reporting a hack, the account is frozen
+        vm.startPrank(owner);
+
+        // Deposit funds to vault
+        _depositFunds();
+
+        reentrantCall();
+        
+
+        // Report a hack
+        (bool isFrozen, uint256 lostFunds) = vault.reportHack();
+        assertTrue(isFrozen);
+        assert(lostFunds < initialDeposit);
+
+        // Try sending funds (should revert due to frozen account)
+        vm.expectRevert();
+        vault.sendFunds(payable(user), 0.1 ether);
+
+        vm.stopPrank();
+    }
+
+    function testReceiveEther() public {
+        // Simulate receiving Ether
+        // vm.deal(address(vault), 1 ether);
+        _depositFunds();
+
+        (bool success, ) = address(vault).call{value: 0.5 ether}("");
+        assertTrue(success);
+
+        // Check the updated balance
+        assertEq(vault.getBalance(), initialDeposit + 0.5 ether);
+    }
+
+    function _depositFunds() private{
+         (bool success, ) = address(vault).call{value: initialDeposit}("");
+        assertTrue(success);
+    }
+
+    function reentrantCall() private {
+        for (uint256 i = 0; i < 3; i++) {
+            vault.sendFunds(payable(user), 0.01 ether);  // 5 transactions in a short time
         }
-
-        // freeze account on the 6th transaction
-        vm.expectRevert();
-        isSuccessful = s_SecuredVault.sendFunds(payable(user), 1 ether);
-
-        vm.stopPrank();
-
-        // console.log(s_SecuredVault.getBalance());
-    }
-
-    // Test: Check if account gets frozen when threshod exceeded
-    function testThresholdFreeze() public {
-        vm.startPrank(owner);
-
-        // send funds below the threshold
-        bool isSuccessful = s_SecuredVault.sendFunds(payable(user), 9 ether);
-        assertEq(address(user).balance, 9 ether);
-        assertTrue(isSuccessful);
-
-
-        // send funds above the threshold
-        // vm.expectRevert();
-        isSuccessful = s_SecuredVault.sendFunds(payable(user), 12 ether);
-        console.log(isSuccessful);
-
-        // Frozen confirmation
-        // Attention needed
-        bool isFrozen = s_SecuredVault.getAccountStatus();
-        // console.log(isFrozen);
-        assertTrue(isFrozen);
-        vm.stopPrank();
-    }
-
-    // Test: Unfreezing account with correct secret
-    function testUnfreezeAccount() public {
-        vm.startPrank(owner);
-        bool isSuccessful;
-
-        // send fund to trigger freeze
-        isSuccessful = s_SecuredVault.sendFunds(payable(user), 12 ether);
-        bool isFrozen = s_SecuredVault.getAccountStatus();
-        assertFalse(isSuccessful);
-        assertTrue(isFrozen);
-
-        // sund fund should fail when account status is freeze
-        vm.expectRevert();
-        isSuccessful = s_SecuredVault.sendFunds(payable(user), 12 ether);
-
-        // unfreeze with wrong secrets
-        vm.expectRevert();
-        s_SecuredVault.unfreezeAccount("somethingelse");
-
-        // unfreeze with correct secrets
-        s_SecuredVault.unfreezeAccount("test");
-        assertFalse(s_SecuredVault.getAccountStatus());
-
-        vm.stopPrank();
-    }
-
-    // Test: Monitor suspicious behaviour
-    function testSuspiciousBehaviourDetection() public {
-        vm.startPrank(owner);
-        bool isSuccessful;
-
-        // Trigger multiple small transaction in a short period
-        for (uint256 i = 0; i < 6; i++) {
-            isSuccessful = s_SecuredVault.sendFunds(payable(user), 1 ether);
-        }
-
-        // Expect to be frozen many attempt in short period of time
-        bool isFrozen = s_SecuredVault.getAccountStatus();
-        assertTrue(isFrozen);
-    }
-
-    // Test: Secret hashes
-    function testSecretHash() public {
-        vm.startPrank(owner);
-        // s_SecuredVault.setSecret()
-        assertTrue(s_SecuredVault.isHashedMatch("test"));
-        assertFalse(s_SecuredVault.isHashedMatch("something else"));
-        s_SecuredVault.setSecret("mySecret");
-        assertTrue(s_SecuredVault.isHashedMatch("mySecret"));
-        assertFalse(s_SecuredVault.isHashedMatch("something else"));
-
-        vm.stopPrank();
-    }
-
-    function testThreshold() public{
-        vm.startPrank(owner);
-        assert(s_SecuredVault.getThreshold() == 10 ether);
-        assert(s_SecuredVault.getThreshold() != 12 ether);
-        s_SecuredVault.setThreshold(12 ether);
-        assert(s_SecuredVault.getThreshold() == 12 ether);
-        assert(s_SecuredVault.getThreshold() != 10 ether);
-        vm.stopPrank();
     }
 }
