@@ -38,15 +38,15 @@ export function Header() {
         </Link>
 
         <div className='flex justify-between'>
-        <Button className='bg-slate-600 rounded-full text-white mr-4'>Get the app <Image src="/images/arrow-right-sharp.svg" alt="arrow right" 
+        <Button className='bg-slate-600 rounded-full text-white mr-4 transition duration-300 ease-in-out transform hover:bg-blue-600 hover:scale-105'>Get the app <Image src="/images/arrow-right-sharp.svg" alt="arrow right" 
             height={32}
             width={32}
             className='h-8 w-8 ml-2 self-center'/></Button>
         
         {isConnected ? (
-          <Button className = 'bg-white text-black rounded-full hover:bg-blue-600 hover:text-white' onClick={() => disconnect()}>Disconnect</Button>
+          <Button className = 'bg-white text-black rounded-full hover:bg-blue-500 hover:text-white transition duration-300 ease-in-out transform hover:scale-105' onClick={() => disconnect()}>Disconnect</Button>
         ) : (
-          <Button className = 'bg-white text-black rounded-full hover:bg-blue-600 hover:text-white' onClick={() => connect({ connector: connectors[0] })}>Connect wallet</Button>
+          <Button className = 'bg-white text-black rounded-full hover:bg-blue-600 hover:text-white transition duration-300 ease-in-out transform hover:scale-105' onClick={() => connect({ connector: connectors[0] })}>Connect wallet</Button>
         )}
         </div>
 
