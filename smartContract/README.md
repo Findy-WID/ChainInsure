@@ -191,4 +191,8 @@ Special thanks to the teams behind:
   
 ---
 
+## Deployed Addresses
+
+ManagerModule#Manager - 0x8690c9e8329aeEB65bB5ad299fD4B6d67882C05D
+
 This README should provide a clear understanding of the CHAIN INSURE project, its features, and how to deploy, test, and secure it.

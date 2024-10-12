@@ -22,7 +22,7 @@ contract ManagerTest is Test {
     function setUp() public {
         s_manager = new Manager();
         deal(owner, INITIAL_FUNDS);
-        deal(owner, INITIAL_FUNDS);
+        // deal(owner, INITIAL_FUNDS);
     }
 
     function testCreateVault() public {
