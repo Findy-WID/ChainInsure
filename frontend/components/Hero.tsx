@@ -20,7 +20,7 @@ export function Hero() {
           className="-z-50 h-[800px]"
         />
       </div>
-      <div className="container py-40 z-10 mx-auto px-4 text-center">
+      <div className="container pt-60 pb-20 z-10 mx-auto px-4 text-center">
         <h1 className="text-white text-5xl font-bold mb-6">Enjoy real time wallet monitoring,
         and hassle free protection.</h1>
         <p className="text-white text-xl mb-8">Create a vault that protects your assets from malicious hacks
@@ -37,7 +37,6 @@ export function Hero() {
         
       </div>
       <div>
-      <Marquee/>
       <Marquee/>
       </div>
     </section>

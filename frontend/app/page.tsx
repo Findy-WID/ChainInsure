@@ -5,6 +5,9 @@ import { Footer } from '@/components/Footer'
 import { Cta } from '@/components/Cta'
 import SwapComponents from '@/components/features/page'
 import FramePage from '@/components/Frame'
+import { Info } from '@/components/Info'
+import { Faqs } from '../components/Faqs'
+import { WaitList } from '@/components/WaitList'
 
 
 export default function Home() {
@@ -17,6 +20,10 @@ export default function Home() {
         <SwapComponents />
         <Cta/>
         <FramePage />
+        <Features />
+        <Info/>
+        <Faqs/>
+        <WaitList/>
       </main>
       <Footer />
     </div>
