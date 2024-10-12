@@ -1,3 +1,0 @@
-[submodule "smartContract/lib/v3-core"]
-	path = smartContract/lib/v3-core
-	url = https://github.com/uniswap/v3-core
