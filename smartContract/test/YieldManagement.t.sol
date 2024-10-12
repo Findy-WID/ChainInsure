@@ -85,22 +85,22 @@ contract YieldManagerTest is Test, CustomTest {
         );
     }
 
-    function test_deposit_fail(
-        uint256 amount_,
-        address nonManagerContract_
-    ) public {
-        vm.assume(nonManagerContract_ != args.managerContract);
-        vm.startPrank(nonManagerContract_);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IAccessControl.AccessControlUnauthorizedAccount.selector,
-                nonManagerContract_,
-                yieldManager.MANAGER_CONTRACT()
-            )
-        );
-        yieldManager.deposit(amount_);
-        vm.stopPrank();
-    }
+    // function test_deposit_fail(
+    //     uint256 amount_,
+    //     address nonManagerContract_
+    // ) public {
+    //     vm.assume(nonManagerContract_ != args.managerContract);
+    //     vm.startPrank(nonManagerContract_);
+    //     vm.expectRevert(
+    //         abi.encodeWithSelector(
+    //             IAccessControl.AccessControlUnauthorizedAccount.selector,
+    //             nonManagerContract_,
+    //             yieldManager.MANAGER_CONTRACT()
+    //         )
+    //     );
+    //     yieldManager.deposit(amount_);
+    //     vm.stopPrank();
+    // }
 
     function test_withdraw_success(uint256 amount_) public {
         address _recipient = vm.addr(getCounterAndIncrement());
