@@ -1,8 +1,7 @@
-'use client'
+"use client";
 
-
-import React from "react"
-import { marqueeList } from "@/utils/marquee-content"
+import React from "react";
+import { marqueeList } from "@/utils/marquee-content";
 
 
 function Marquee () {
@@ -37,10 +36,8 @@ function Marquee () {
         </div>
         </div>
       </div>
-    )
+  
+  );
 }
 
-export default Marquee
-
-
-
+export default Marquee;
