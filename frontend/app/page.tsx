@@ -2,7 +2,7 @@ import { Header } from '@/components/Header'
 import { Hero } from '@/components/Hero'
 import { Features } from '@/components/Features'
 import { Footer } from '@/components/Footer'
-import { Cta } from '@/components/Cta'
+// import { Cta } from '@/components/Cta'
 import SwapComponents from '@/components/features/page'
 import FramePage from '@/components/Frame'
 
@@ -15,7 +15,7 @@ export default function Home() {
         <Hero />
         {/* <Features /> */}
         <SwapComponents />
-        <Cta/>
+        {/* <Cta/> */}
         <FramePage />
       </main>
       <Footer />

@@ -94,33 +94,29 @@ export function Header() {
   // }, [isConnected, router]);
 
   return (
-    <header
-      className={`fixed bg-[#15173033] w-full transition-all z-50 duration-300 ${
-        isScrolled ? "bg-white/80 backdrop-blur-md shadow-md" : ""
-      }`}
-    >
+    <header className={`fixed z-50 bg-[#15173033] w-full transition-all duration-300 ${isScrolled ? 'bg-white/80  border-b border-[#1E1E33] backdrop-blur-md shadow-md text-[#1E1E33]' : 'text-white'}`}>
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <nav className="hidden md:flex space-x-8">
-          <Link href="#docs" className="text-white hover:text-blue-600">
+          <Link href="#docs" className=" hover:text-blue-600">
             Docs
           </Link>
-          <Link href="#about-us" className="text-white hover:text-blue-600">
+          <Link href="#about-us" className=" hover:text-blue-600">
             About us
           </Link>
-          <Link href="#blog" className="text-white hover:text-blue-600">
+          <Link href="#blog" className=" hover:text-blue-600">
             Blog
           </Link>
-          <Link href="#support" className="text-white hover:text-blue-600">
+          <Link href="#support" className=" hover:text-blue-600">
             Support
           </Link>
         </nav>
         <Link href="/" className="flex items-center space-x-2">
-          <span className="text-2xl font-light leading-10 text-white font-serif">
+          <span className="text-2xl font-light leading-10  font-serif">
             Chain Insure
           </span>
         </Link>
 
-        <div className="flex justify-between">
+        <div className="flex justify-between bg-[#1E1E33] rounded-md">
           <Wallet>
             <ConnectWallet>
               <Avatar className="h-6 w-6" />
