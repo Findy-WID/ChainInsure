@@ -2,7 +2,7 @@
 pragma solidity ^0.8.24;
 
 import {YieldManager} from "./YieldManager.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+// import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SecuredVault} from "./SecuredVault.sol";
 import {Manager} from "./Manager.sol";
 
@@ -39,7 +39,7 @@ contract InsuranceManager {
     mapping(address => Policy) public currentUserPolicy;
 
     YieldManager public yielManager;    // Instance of YieldManager for yield-bearing operations
-    IERC20 public paymentToken;         // Token used for policy payments (e.g., DAI, USDC, etc.)
+    // IERC20 public paymentToken;         // Token used for policy payments (e.g., DAI, USDC, etc.)
 
     // Events to log important actions
     event PolicyCreated(address indexed user, uint256 insuredAmount, uint256 premium);
@@ -74,16 +74,12 @@ contract InsuranceManager {
         _;
     }
 
-    /**
-     * @notice Constructor to initialize the contract with token and pool addresses
-     * @param paymentTokenAddress_ Address of the ERC20 token used for payments
-     * @param poolAddress_ Address of the yield pool for investment
-     */
-    constructor(address paymentTokenAddress_, address poolAddress_) {
-        yielManager = new YieldManager(
-            address(this), poolAddress_, paymentTokenAddress_
-        );
-        paymentToken = IERC20(paymentTokenAddress_);
+    constructor() {
+        // address paymentTokenAddress_, address poolAddress_
+        // yielManager = new YieldManager(
+        //     address(this), poolAddress_, paymentTokenAddress_
+        // );
+        // paymentToken = IERC20(paymentTokenAddress_);
         owner = msg.sender; // The contract owner is the deployer
     }
 
@@ -94,7 +90,7 @@ contract InsuranceManager {
      * @param _period Duration of the policy in days
      * @return The ID of the created policy
      */
-    function createPolicy(uint256 _coverageAmount, uint256 _premium, uint256 _period) external returns (uint256) {
+    function createPolicy(uint256 _coverageAmount, uint256 _premium, uint256 _period) payable external returns (uint256) {
         if (_coverageAmount < MIN_VALUE || _coverageAmount > MAX_VALUE) {
             revert InsurancePolicy_InvalidValue(_coverageAmount); // Ensure coverage is within valid limits
         }
@@ -220,7 +216,7 @@ contract InsuranceManager {
 
 
     // Calculate premium based on coverage and risk
-    function calculatePremium(uint256 coverageAmount_, uint256 risk_) internal pure returns (uint256) {
+    function _calculatePremium(uint256 coverageAmount_, uint256 risk_) internal pure returns (uint256) {
         uint256 basePercentageInBIPs = 100;
         uint256 additionalPercentageInBIPs = (200 * risk_) / 100;
         uint256 totalPercentage = basePercentageInBIPs + additionalPercentageInBIPs;

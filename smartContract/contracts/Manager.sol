@@ -8,6 +8,8 @@ error Manager_VaultDoesNotExist();  // Updated error message
 
 contract Manager {
 
+    address owner;
+
     // Mapping from user to their SecuredVault
     mapping(address => SecuredVault) private s_userVault;
 
@@ -17,6 +19,10 @@ contract Manager {
             revert Manager_VaultDoesNotExist();
         }
         _;
+    }
+
+    constructor() {
+        owner = msg.sender;
     }
 
     // Function to create a new vault for a user
