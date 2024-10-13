@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useContractWrite, usePrepareContractWrite, useContractRead } from 'wagmi'
+import {  useReadContract, useAccount, useSendTransaction } from 'wagmi'
 import { parseEther } from 'viem'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,28 +12,22 @@ import  securedVaultABI  from '../../contractData/SecuredVault';
 
 const MANAGER_CONTRACT_ADDRESS = '0x...'; // Replace with the actual contract address
 
-export function SecuredVault({ userAddress }: { userAddress: `0x${string}` }) {
+export function SecuredVault({vaultAddress, userAddress }: { vaultAddress: `0x${string}`, userAddress: `0x${string}` }) {
   const [depositAmount, setDepositAmount] = useState('')
+  const { address } = useAccount();
+  const {data: hash, sendTransaction} = useSendTransaction();
 
-  const { data: vaultBalance } = useContractRead({
+  const { data: vaultBalance } = useReadContract({
     address: vaultAddress,
     abi: securedVaultABI,
     functionName: 'getBalance',
-    args: [userAddress],
+    args: [userAddress] as any,
   })
-
-  const { config: depositConfig } = usePrepareContractWrite({
-    address: vaultAddress,
-    abi: securedVaultABI,
-    functionName: 'deposit',
-    args: [parseEther(depositAmount || '0')],
-  })
-
-  const { write: deposit } = useContractWrite(depositConfig)
 
   const handleDeposit = (e: React.FormEvent) => {
     e.preventDefault()
-    deposit?.()
+    sendTransaction({to: vaultAddress, value: parseEther(depositAmount || '0')})
+
   }
 
   return (
@@ -42,7 +36,7 @@ export function SecuredVault({ userAddress }: { userAddress: `0x${string}` }) {
         <CardTitle>Your Secured Vault</CardTitle>
       </CardHeader>
       <CardContent>
-        <p>Balance: {vaultBalance ? parseEther(vaultBalance.toString()) : '0'} ETH</p>
+        <p> {`Balance: ${vaultBalance ? parseEther(vaultBalance.toString()) : '0'} ETH`}</p>
         <form onSubmit={handleDeposit} className="mt-4">
           <Label htmlFor="depositAmount">Deposit Amount (ETH)</Label>
           <Input
