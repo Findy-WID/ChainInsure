@@ -1,4 +1,4 @@
-{"abi": [
+const abi = [
     {
       "inputs": [
         {
@@ -412,4 +412,5 @@
       "stateMutability": "view",
       "type": "function"
     }
-  ]}
+  ] as const
+export default abi;

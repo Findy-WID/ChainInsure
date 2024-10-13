@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { securedVaultABI } from '@/lib/contractABI'
+import  managerABI  from '../../contractData/Manager';
+import  securedVaultABI  from '../../contractData/SecuredVault';
 
-const vaultAddress = '0x...' // Replace with your SecuredVault contract address
+const MANAGER_CONTRACT_ADDRESS = '0x...'; // Replace with the actual contract address
 
 export function SecuredVault({ userAddress }: { userAddress: `0x${string}` }) {
   const [depositAmount, setDepositAmount] = useState('')

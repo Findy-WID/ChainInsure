@@ -1,13 +1,17 @@
 'use client'
 
 import { useState } from 'react';
-import { useAccount, useContractRead, useContractWrite, useWaitForTransaction } from 'wagmi';
+import { useAccount, useWriteContract, useReadContract } from 'wagmi';
 import { parseEther } from 'viem';
-import { managerABI } from '@/lib/contractABI';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+
+import  managerABI  from '../../contractData/Manager';
+import  securedVaultABI  from '../../contractData/SecuredVault';
+// import { wagmiConfig } from '@/wagmi';
+import { getBalance } from 'viem/actions';
 
 const MANAGER_CONTRACT_ADDRESS = '0x...'; // Replace with the actual contract address
 
@@ -17,52 +21,47 @@ export default function VaultManager() {
   const [secret, setSecret] = useState('');
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [withdrawAddress, setWithdrawAddress] = useState('');
+  const { data: hash, isPending: isWpending, writeContract } = useWriteContract() 
 
-  const { data: vaultBalance } = useContractRead({
+  const { data: vaultBalance } = useReadContract({
     address: MANAGER_CONTRACT_ADDRESS,
     abi: managerABI,
     functionName: 'getVaultBalance',
-    args: [address],
-    enabled: !!address,
+    args: [address] as any,
   });
 
-  const { data: vaultAddress } = useContractRead({
+  const { data: vaultAddress, error, isPending } = useReadContract({
     address: MANAGER_CONTRACT_ADDRESS,
     abi: managerABI,
     functionName: 'getVaultAddress',
-    args: [address],
-    enabled: !!address,
+    args: [address] as any,
   });
 
-  const { write: createVault, data: createVaultData } = useContractWrite({
-    address: MANAGER_CONTRACT_ADDRESS,
-    abi: managerABI,
-    functionName: 'createVault',
-  });
-
-  const { write: withdrawFunds, data: withdrawFundsData } = useContractWrite({
-    address: MANAGER_CONTRACT_ADDRESS,
-    abi: managerABI,
-    functionName: 'withdrawFunds',
-  });
-
-  const { isLoading: isCreatingVault } = useWaitForTransaction({
-    hash: createVaultData?.hash,
-  });
-
-  const { isLoading: isWithdrawing } = useWaitForTransaction({
-    hash: withdrawFundsData?.hash,
-  });
+  // const balance = getBalance(wagmiConfig as any, {
+  //   address: vaultAddress as any,
+  //   unit: 'ether' as const, 
+  // })
 
   const handleCreateVault = () => {
     if (address && threshold && secret) {
-      createVault({ args: [address, parseEther(threshold), secret] });
+      writeContract({
+        address: MANAGER_CONTRACT_ADDRESS,
+        abi: managerABI,
+        functionName: 'createVault',
+        args: [address, parseEther(threshold), secret],
+      })
     }
   };
 
+
   const handleWithdraw = () => {
     if (address && withdrawAddress && withdrawAmount) {
-      withdrawFunds({ args: [address, withdrawAddress, parseEther(withdrawAmount)] });
+      writeContract({
+        address: MANAGER_CONTRACT_ADDRESS,
+        abi: managerABI,
+        functionName: 'withdrawFunds',
+        args: [address, withdrawAddress as any, parseEther(withdrawAmount) as any]
+      })
     }
   };
 
@@ -96,8 +95,13 @@ export default function VaultManager() {
           </div>
         </CardContent>
         <CardFooter>
-          <Button onClick={handleCreateVault} disabled={isCreatingVault}>
-            {isCreatingVault ? 'Creating...' : 'Create Vault'}
+          <Button onClick={handleCreateVault} 
+          // disabled={isCreatingVault}
+          >
+            {
+            // isCreatingVault ? 
+            // 'Creating...' : 
+            'Create Vault'}
           </Button>
         </CardFooter>
       </Card>
@@ -141,8 +145,14 @@ export default function VaultManager() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button onClick={handleWithdraw} disabled={isWithdrawing}>
-              {isWithdrawing ? 'Withdrawing...' : 'Withdraw'}
+            <Button onClick={handleWithdraw} 
+            // disabled={isWithdrawing}
+            >
+              {
+              // isWithdrawing ? 
+              // 'Withdrawing...' : 
+              'Withdraw'
+              }
             </Button>
           </CardFooter>
         </Card>

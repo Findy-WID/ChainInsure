@@ -4,7 +4,9 @@ import { useConnect } from 'wagmi'
 import { Button } from '@/components/ui/button'
 
 export function WalletConnect() {
-  const { connect, connectors, isLoading, pendingConnector } = useConnect()
+  const { connect, connectors, 
+    // isLoading, pendingConnector 
+  } = useConnect()
 
   return (
     <div>
@@ -15,9 +17,9 @@ export function WalletConnect() {
           onClick={() => connect({ connector })}
         >
           {connector.name}
-          {isLoading &&
+          {/* {isLoading &&
             pendingConnector?.id === connector.id &&
-            ' (connecting)'}
+            ' (connecting)'} */}
         </Button>
       ))}
     </div>
