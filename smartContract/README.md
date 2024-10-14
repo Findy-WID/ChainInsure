@@ -4,195 +4,144 @@
 **CHAIN INSURE** is a Solidity-based insurance contract designed to secure digital assets stored in Ethereum wallets by monitoring for unusual or malicious activity. The system automatically freezes the insured account if suspicious behavior is detected, such as multiple transactions in a short time span or funds exceeding a threshold. It offers an added layer of protection with a secret-based unfreezing mechanism.
 
 The project is built using Solidity, OpenZeppelin security modules, and the Aave protocol for yield management.
-
-## Features
-
-- **Secure Fund Management**: Transfers can only be initiated by the contract owner.
-- **Suspicious Behavior Detection**: Monitors transaction patterns to detect unusual activity and freezes the account when detected.
-- **Threshold-based Security**: Automatically freezes accounts if funds transferred exceed a certain threshold.
-- **Hack Reporting**: Enables users to report hacks, which immediately freezes the account and locks the funds.
-- **Secret-based Account Unfreezing**: The owner can unfreeze an account using a predefined secret.
-- **Yield Management**: Deposits user funds into Aave to generate yield and allows withdrawals of interest-bearing tokens.
-- **Pausable and Non-reentrant**: Implements OpenZeppelin's `Pausable` and `ReentrancyGuard` for added security.
-
-## Table of Contents
-
-- [Installation](#installation)
-- [Usage](#usage)
-- [Contract Overview](#contract-overview)
-- [Tests](#tests)
-- [Security](#security)
-- [Contributing](#contributing)
-- [License](#license)
+Below is a unified **README documentation** covering the `Manager`, `SecuredVault`, `InsuranceManager`, and `StakingPool` contracts. This README provides an overview of the contracts, their purpose, key functions, and how they interact with each other.
 
 ---
 
-## Installation
+# **Smart Contracts Documentation**
 
-To run the CHAIN INSURE project locally, you'll need to set up a development environment using [Foundry](https://github.com/foundry-rs/foundry) or another Solidity tool of your choice. Here's how to get started:
-
-### Prerequisites
-
-- [Foundry](https://github.com/foundry-rs/foundry)
-- [Node.js](https://nodejs.org/) (for JavaScript-based testing or scripts)
-- [Aave](https://aave.com/) and [OpenZeppelin Contracts](https://openzeppelin.com/contracts/)
-
-### Steps
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/Findy-WID/ChainInsure.git
-   cd chain-insure
-   ```
-
-2. **Install Dependencies**:
-   Install Foundry (if not already installed):
-   ```bash
-   foundryup
-   ```
-
-   You may also need to install dependencies like OpenZeppelin:
-   ```bash
-   npm install @openzeppelin/contracts
-   ```
-
-3. **Compile the contract**:
-   Use Foundry to compile the smart contracts:
-   ```bash
-   forge build
-   ```
+This repository contains multiple smart contracts designed to work together, including **Manager**, **SecuredVault**, **InsuranceManager**, and **StakingPool**. These contracts provide functionality for managing vaults, staking rewards, insurance policies, and security checks to ensure smooth and transparent decentralized finance operations.
 
 ---
 
-## Usage
-
-### Deploying the Contract
-
-You can deploy the `SecuredVault` and `Manager` contracts to a test network like Goerli using tools like Hardhat or Remix.
-
-Here's how to deploy using Foundry:
-
-1. **Deploy the SecuredVault contract**:
-   ```solidity
-   vault = new SecuredVault(ownerAddress, thresholdValue, secretPhrase);
-   ```
-
-2. **Interacting with the contract**:
-   - **Sending Funds**: As the owner, you can send funds to a specified address:
-     ```solidity
-     vault.sendFunds(payable(recipient), amount);
-     ```
-
-   - **Unfreeze Account**: To unfreeze the account, provide the correct secret:
-     ```solidity
-     vault.unfreezeAccount(secretPhrase);
-     ```
-
-   - **Get Account Status**: You can query whether the account is frozen:
-     ```solidity
-     vault.getAccountStatus();
-     ```
-
-   - **Report Hack**: If the account is hacked, report the hack:
-     ```solidity
-     vault.reportHack();
-     ```
-
-### Depositing Funds into Aave
-
-The `YieldManager` contract allows you to deposit funds into Aave to earn interest:
-
-```solidity
-yieldManager.deposit(amount);
-```
-
-Withdraw the deposited funds along with the interest:
-
-```solidity
-yieldManager.withdraw(amount, recipient);
-```
+## **Table of Contents**
+1. [Contracts Overview](#contracts-overview)
+2. [Contract Interactions](#contract-interactions)
+3. [Contracts](#contracts)
+    - [Manager](#1-manager)
+    - [SecuredVault](#2-securedvault)
+    - [InsuranceManager](#3-insurancemanager)
+    - [StakingPool](#4-stakingpool)
+4. [Deployment and Usage](#deployment-and-usage)
 
 ---
 
-## Contract Overview
-
-### `SecuredVault.sol`
-
-This contract is the core component responsible for managing and securing user funds. It supports account freezing, secret-based unfreezing, and monitoring of suspicious behaviors.
-
-#### Key Functions:
-- `sendFunds(address payable _to, uint256 _amount)`: Allows the owner to send funds.
-- `freezeAccount()`: Internal function to freeze the account when suspicious activity is detected.
-- `unfreezeAccount(string memory _secret)`: Unfreezes the account using the correct secret.
-- `monitorBehavior()`: Internal function that monitors suspicious behavior such as too many transactions in a short period.
-- `reportHack()`: Allows users to manually report a hack.
-
-### `Manager.sol`
-
-The `Manager` contract allows the creation and management of multiple `SecuredVault` contracts, each tied to a specific owner.
-
-### `YieldManager.sol`
-
-This contract integrates with Aave to provide yield farming functionality, allowing users to deposit ERC-20 tokens and earn interest.
+## **Contracts Overview**
+- **Manager**: Responsible for managing vault addresses for users and connecting vaults with the insurance mechanism.
+- **SecuredVault**: Holds user assets and implements hack detection and freezing mechanisms to secure funds.
+- **InsuranceManager**: Manages insurance policies, allowing users to create policies, claim rewards, or cancel them.
+- **StakingPool**: Allows users to stake ETH, earn rewards, and withdraw their funds. Works with `WETH` and integrates with the Aave pool for yield-bearing operations.
 
 ---
 
-## Tests
+## **Contract Interactions**
+- **InsuranceManager** relies on the `SecuredVault` to detect hacks and approve insurance claims.
+- **StakingPool** integrates with **WETH** and **Aave IPool** to deposit, withdraw, and stake ETH efficiently.
+- **Manager** resolves vault addresses for users to allow seamless insurance claims and security checks between different modules.
 
-Unit tests are written using the Foundry framework and are located in the `test` directory.
+---
 
-### Running Tests
+## **Contracts**
 
-To run the tests:
+### **1. Manager**
+The `Manager` contract is responsible for managing vault addresses for users. It ensures that each user has a unique vault, and these vaults are used by the insurance mechanism.
+
+#### **Key Functions:**
+- **`createVault(address _owner, uint256 _threshold, string memory _secret)`**: Returns the `SecuredVault` create a vault to a specific user.
+
+- **`getVaultAddress(address _user)`**: Returns the `SecuredVault` address assigned to a specific user.
+- **`setVaultAddress(address _user, address _vault)`**: Assigns a vault address to a user (only callable by the owner).
+
+---
+
+### **2. SecuredVault**
+The `SecuredVault` stores user assets securely and offers a mechanism to detect and report hacks or freezing events. It is integral to the insurance process.
+
+#### **Key Functions:**
+- **`reportHack()`**: Checks if a hack or loss has been reported and returns the status and lost funds.
+- **`freezeAccount(address _user)`**: Freezes the user’s account if malicious activity is detected (admin-only function).
+
+---
+
+### **3. InsuranceManager**
+The `InsuranceManager` handles the entire lifecycle of insurance policies, including creation, activation, review, and claims. It ensures that policies are only approved if no suspicious activity is detected by `SecuredVault`.
+
+#### **Key Structures:**
+- **`Policy`**: Contains policy details such as owner, coverage amount, premium, duration, and status.
+- **`PolicyStatus`**: Enum representing policy statuses: `Pending`, `Approved`, `Rejected`, `Claimed`.
+
+#### **Key Functions:**
+- **`createPolicy(uint256 _coverageAmount, uint256 _period)`**: Creates a new insurance policy for the caller.
+- **`claimPolicy()`**: Allows the policyholder to claim their insurance payout if the policy is approved.
+- **`cancelPolicy()`**: Cancels an active policy and marks it as `Rejected`.
+- **`function getPolicy(address _user)`**: returns the policy of the current user
+-  **` function getPremiumFee(uint256 coverageAmount_,uint256 period_ )`**: returns the funds the user will pay for an insurance 
+
+---
+
+### **4. StakingPool**
+The `StakingPool` contract allows users to stake their ETH, earn rewards, and withdraw their funds. It integrates with **Aave's IPool** for yield and **WETH** to handle ETH deposits.
+
+#### **Key Functions:**
+- **`_stake()`**: Internal function that stakes ETH sent by the user and deposits it into the Aave pool.
+- **`withdraw(uint256 amount)`**: Allows users to withdraw their staked ETH plus earned rewards.
+- **`claimRewards()`**: Transfers accumulated rewards to the user’s account.
+- **`pause()` / `unpause()`**: Admin-only functions to pause or resume the staking pool.
+- **`emergencyWithdraw()`**: Withdraws all user funds in case of an emergency (admin-only).
+
+---
+
+## **Deployment and Usage**
+
+### **1. Deploying Contracts**
+1. **Manager**: Deploy this first to manage vault addresses.
+2. **SecuredVault**: Deploy individual vaults for each user.
+3. **InsuranceManager**: Deploy and link it with the `Manager` contract.
+4. **StakingPool**: Deploy with Aave Pool and WETH addresses.
+
 ```bash
-forge test
+# Example Deployment (using Hardhat)
+npx hardhat run scripts/deploy.js --network goerli
 ```
 
-Tests include:
+### **2. Interactions**
+- **Staking ETH**:
+    - Send ETH directly to the `StakingPool` contract’s address.
+    - Example: `receive()` or `fallback()` functions trigger staking automatically.
 
-1. **Vault Creation**: Ensures the vault is created properly for a user.
-2. **Transaction Threshold**: Tests account freezing when the transaction exceeds the threshold.
-3. **Suspicious Activity Detection**: Verifies the account freezing due to suspicious behavior.
-4. **Unfreeze with Secret**: Tests that an account can only be unfrozen with the correct secret.
-5. **Yield Management**: Tests depositing and withdrawing from Aave.
+- **Creating an Insurance Policy**:
+    - Call `createPolicy()` with desired coverage and period.
+    - Example: 
+      ```solidity
+      insuranceManager.createPolicy(100 ether, 30);
+      ```
+
+- **Claiming Insurance**:
+    - Call `claimPolicy()` after the policy is approved by the manager.
+    - Example:
+      ```solidity
+      insuranceManager.claimPolicy();
+      ```
+
+- **Managing Vaults**:
+    - Set a vault address for a user in `Manager`.
+    - Example:
+      ```solidity
+      manager.setVaultAddress(userAddress, vaultAddress);
+      ```
 
 ---
 
-## Security
+## **Example Workflows**
 
-This contract includes multiple layers of security:
-- **ReentrancyGuard**: Protects against reentrancy attacks.
-- **Pausable**: Can pause the contract in emergencies.
-- **Thresholds and Monitoring**: Detects suspicious behavior and automatically freezes accounts.
-- **Secret-Based Recovery**: A secret phrase is required to unfreeze the account, enhancing security after a hack.
-  
-A detailed audit is recommended before deploying this contract in a production environment.
+### **Staking Workflow:**
+1. User sends ETH to `StakingPool`.
+2. `StakingPool` converts ETH to WETH and deposits it into Aave.
+3. User earns rewards and can withdraw both principal and rewards.
 
----
-
-## Contributing
-
-We welcome contributions! Feel free to fork this repository and submit pull requests. Please ensure your code passes all tests and adheres to the project's coding standards.
+### **Insurance Policy Workflow:**
+1. User creates a policy via `InsuranceManager`.
+2. If no hacks are detected by `SecuredVault`, the policy is approved.
+3. User claims the payout if a valid policy exists and no security issues occur.
 
 ---
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
---- 
-
-## Acknowledgments
-
-Special thanks to the teams behind:
-- [Aave](https://aave.com)
-- [OpenZeppelin](https://openzeppelin.com)
-- [Foundry](https://github.com/foundry-rs/foundry)
-  
----
-
-## Deployed Addresses
-
-ManagerModule#Manager - 0x8690c9e8329aeEB65bB5ad299fD4B6d67882C05D
-
-This README should provide a clear understanding of the CHAIN INSURE project, its features, and how to deploy, test, and secure it.

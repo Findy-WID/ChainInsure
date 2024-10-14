@@ -24,20 +24,20 @@ interface IWETH {
 // ------------------------
 // Staking Pool Contract
 // ------------------------
-contract StakingPool is AccessControlEnumerable, Pausable, ReentrancyGuard {
+contract StakingPool is Pausable, ReentrancyGuard {
     // ------------------------
     // Constants & State Variables
     // ------------------------
-    bytes32 public ADMIN_ROLE = keccak256("ADMIN_ROLE");
-    bytes32 public PAUSER_ROLE = keccak256("PAUSER_ROLE");
+  
 
     IPool internal pool;
     IWETH internal weth;
 
     uint256 public totalStaked;
-    uint256 public rewardRate; // Reward per second per ETH
+    uint256 public rewardRate = 31700 wei; // Reward per second per ETH
     uint256 public lastRewardTime;
     address private owner;
+    address private manager;
 
     struct Stake {
         uint256 amount;
@@ -45,7 +45,7 @@ contract StakingPool is AccessControlEnumerable, Pausable, ReentrancyGuard {
         uint256 lastStakeTime;
     }
 
-    mapping(address => Stake) private userStakes;
+    mapping(address => Stake) public userStakes;
 
     // ------------------------
     // Events
@@ -57,6 +57,14 @@ contract StakingPool is AccessControlEnumerable, Pausable, ReentrancyGuard {
     event EmergencyWithdrawal(address admin, uint256 amount, uint256 timestamp);
     event RewardRateUpdated(uint256 newRate, address updatedBy);
 
+    modifier  onlyOwner() {
+        require(msg.sender == owner, "Only owner is permitted");
+        _;
+    }
+    modifier  onlyManager() {
+        require(msg.sender == manager, "Only owner is permitted");
+        _;
+    }
     // ------------------------
     // Constructor
     // ------------------------
@@ -64,6 +72,9 @@ contract StakingPool is AccessControlEnumerable, Pausable, ReentrancyGuard {
         pool = IPool(_pool);
         weth = IWETH(_weth);
         owner = msg.sender;
+        // uint208 x = 100;
+
+        // rewardRate = (x/10000) / (365 days * 24 hours * 60 minutes * 60 seconds);
     }
 
     // ------------------------
@@ -115,21 +126,30 @@ contract StakingPool is AccessControlEnumerable, Pausable, ReentrancyGuard {
         emit RewardsClaimed(msg.sender, reward, block.timestamp);
     }
 
+    function getRewards() external returns(uint256){
+        _updateRewards(msg.sender);
+        return userStakes[msg.sender].rewardDebt;
+    }
+     function getAmount() external returns(uint256){
+        _updateRewards(msg.sender);
+        return userStakes[msg.sender].amount;
+    }
+
     // ------------------------
     // Admin Functions
     // ------------------------
 
-    function pause() external onlyRole(PAUSER_ROLE) {
+    function pause() external onlyOwner {
         _pause();
         emit Paused(msg.sender);
     }
 
-    function unpause() external onlyRole(PAUSER_ROLE) {
+    function unpause() external onlyOwner {
         _unpause();
         emit Unpaused(msg.sender);
     }
 
-    function emergencyWithdraw() external onlyRole(ADMIN_ROLE) {
+    function emergencyWithdraw() external onlyOwner {
         uint256 wethBalance = weth.balanceOf(address(this));
         pool.withdraw(address(weth), wethBalance, address(this));
         weth.withdraw(wethBalance);
@@ -140,7 +160,7 @@ contract StakingPool is AccessControlEnumerable, Pausable, ReentrancyGuard {
         emit EmergencyWithdrawal(msg.sender, balance, block.timestamp);
     }
 
-    function setRewardRate(uint256 _rate) external onlyRole(ADMIN_ROLE) {
+    function setRewardRate(uint256 _rate) external onlyOwner {
         rewardRate = _rate;
         emit RewardRateUpdated(_rate, msg.sender);
     }
