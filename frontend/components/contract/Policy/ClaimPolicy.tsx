@@ -2,8 +2,8 @@
 
 import { useContractWrite, usePrepareContractWrite } from 'wagmi'
 import { Button } from '@/components/ui/button'
-import { insuranceManagerABI } from '@/lib/contractABI'
-
+import { insuranceManagerABI } from '@/contractABI/insuranceManagerABI'
+;
 export function ClaimPolicy() {
   const { config } = usePrepareContractWrite({
     address: '0x...',  // Replace with your contract address

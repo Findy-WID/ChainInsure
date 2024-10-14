@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { OnchainKitProvider } from "@coinbase/onchainkit";
 import { base } from "viem/chains";
 import { wagmiConfig } from "@/wagmi";
+import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { WalletProvider } from "@/components/wallet/WalletContext";
 
 type Props = { children: ReactNode };
 
@@ -17,9 +19,11 @@ export default function OnchainProvider({ children }: Props) {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <OnchainKitProvider apiKey={projectId} chain={base}>
-          {children}
-        </OnchainKitProvider>
+        <WalletProvider>
+          <OnchainKitProvider apiKey={projectId} chain={base}>
+            <RainbowKitProvider>{children}</RainbowKitProvider>
+          </OnchainKitProvider>
+        </WalletProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );
