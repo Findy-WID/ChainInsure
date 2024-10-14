@@ -7,33 +7,32 @@ import {SecuredVault} from "./SecuredVault.sol";
 import {Manager} from "./Manager.sol";
 
 contract InsuranceManager {
-
     // Enum to represent different statuses a policy can have
     enum PolicyStatus {
-        Pending,    // Policy is under review
-        Approved,   // Policy is approved and active
-        Rejected,   // Policy is rejected
-        Claimed     // Policy has been claimed by the owner
+        Pending, // Policy is under review
+        Approved, // Policy is approved and active
+        Rejected, // Policy is rejected
+        Claimed // Policy has been claimed by the owner
     }
 
     // Structure representing an insurance policy
     struct Policy {
-        uint256 id;                // Unique policy ID
-        address owner;             // The policyholder
-        uint256 coverageAmount;    // Amount the policy covers
-        uint256 premium;           // Premium to be paid for the policy
-        uint256 period;            // Policy duration in days
-        uint256 startTime;         // Policy start time (Unix timestamp)
-        bool active;               // Whether the policy is currently active
-        PolicyStatus status;       // Current status of the policy
+        uint256 id; // Unique policy ID
+        address owner; // The policyholder
+        uint256 coverageAmount; // Amount the policy covers
+        uint256 premium; // Premium to be paid for the policy
+        uint256 period; // Policy duration in days
+        uint256 startTime; // Policy start time (Unix timestamp)
+        bool active; // Whether the policy is currently active
+        PolicyStatus status; // Current status of the policy
     }
 
     uint256 public constant MIN_VALUE = 1e18; // Minimum coverage amount ($1)
     uint256 public constant MAX_VALUE = 1e24; // Maximum coverage amount ($1M)
-    uint256 public nextPolicyId;              // Counter to assign new policy IDs
+    uint256 public nextPolicyId; // Counter to assign new policy IDs
 
-    Manager internal manager;     // Instance of Manager contract to retrieve vault addresses
-    address internal owner;       // Owner of the insurance contract (deployer)
+    Manager internal manager; // Instance of Manager contract to retrieve vault addresses
+    address internal owner; // Owner of the insurance contract (deployer)
 
     // Mapping from user address to their active policy
     mapping(address => Policy) public currentUserPolicy;
@@ -42,7 +41,11 @@ contract InsuranceManager {
     // IERC20 public paymentToken;         // Token used for policy payments (e.g., DAI, USDC, etc.)
 
     // Events to log important actions
-    event PolicyCreated(address indexed user, uint256 insuredAmount, uint256 premium);
+    event PolicyCreated(
+        address indexed user,
+        uint256 insuredAmount,
+        uint256 premium
+    );
     event PolicyReviewed(uint256 indexed policyId, PolicyStatus status);
     event PolicyCancelled(address indexed user);
     event PolicyActivated(uint256 indexed policyId);
@@ -58,6 +61,7 @@ contract InsuranceManager {
     error InsurancePolicy_InsufficientFunds(uint256 _balance);
     error InsurancePolicy_PaymentUnsuccessful();
     error InsurancePolicy_HackDetected();
+    error InsurancePolicy_NoHackDetected();
 
     // Modifier to restrict actions to the policy owner
     modifier onlyPolicyOwner() {
@@ -90,17 +94,19 @@ contract InsuranceManager {
      * @param _period Duration of the policy in days
      * @return The ID of the created policy
      */
-    function createPolicy(uint256 _coverageAmount, uint256 _period) external payable returns (uint256)  {
+    function createPolicy(
+        uint256 _coverageAmount,
+        uint256 _period
+    ) external payable returns (uint256) {
         if (_coverageAmount < MIN_VALUE || _coverageAmount > MAX_VALUE) {
             revert InsurancePolicy_InvalidValue(_coverageAmount); // Ensure coverage is within valid limits
         }
-        
+
         uint256 _premium = _calculatePremium(_coverageAmount, _period);
 
-        if (_premium > msg.value){
+        if (_premium > msg.value) {
             revert InsurancePolicy_InsufficientFunds(_premium);
         }
-
 
         if (currentUserPolicy[msg.sender].active) {
             revert InsurancePolicy_ExistingPolicyIsActive(); // Only one active policy per user allowed
@@ -113,10 +119,10 @@ contract InsuranceManager {
             owner: msg.sender,
             coverageAmount: _coverageAmount,
             premium: _premium,
-            period: (_period * 1 days),    // Convert period to days
-            startTime: block.timestamp,    // Start the policy immediately
-            active: true,                  // Policy is active
-            status: PolicyStatus.Pending   // Status is pending until reviewed
+            period: (_period * 1 days), // Convert period to days
+            startTime: block.timestamp, // Start the policy immediately
+            active: true, // Policy is active
+            status: PolicyStatus.Pending // Status is pending until reviewed
         });
 
         currentUserPolicy[msg.sender] = newPolicy; // Store the policy in the mapping
@@ -132,14 +138,21 @@ contract InsuranceManager {
      */
     function claimPolicy() external onlyPolicyOwner {
         Policy memory policy_ = currentUserPolicy[msg.sender];
+        SecuredVault vaultAddress = manager.getVaultAddress(msg.sender);
+        if (!policy_.active) {
+            revert InsurancePolicy_NoActivePolicy();
+        }
+        SecuredVault securedVault = SecuredVault(vaultAddress);
+
+        uint lostFunds = _approvePolicy(securedVault, policy_);
 
         if (policy_.status != PolicyStatus.Approved) {
             revert InsurancePolicy_NotApproved(); // Only approved policies can be claimed
         }
-        SecuredVault securedVault = SecuredVault(manager.getVaultAddress(msg.sender));
 
         // Check if there are enough funds in the vault and withdraw them
-        (bool success, ) = msg.sender.call{value: securedVault.getBalance()}("");
+        (bool success, ) = msg.sender.call{value: lostFunds}("");
+
         if (!success) {
             revert InsurancePolicy_PaymentUnsuccessful(); // Revert if withdrawal fails
         }
@@ -171,23 +184,23 @@ contract InsuranceManager {
      * @notice Approve the policy after verifying no suspicious behavior or hack
      * @dev Integrates with the SecuredVault's `reportHack` function to check for hacks or account freezing
      */
-    function _approvePolicy() internal  {
-        address _user = msg.sender;
-        SecuredVault securedVault = SecuredVault(manager.getVaultAddress(_user));
-
+    function _approvePolicy(
+        SecuredVault securedVault_,
+        Policy memory policy_
+    ) internal returns (uint256) {
         // Call `reportHack` from the SecuredVault contract to detect any hacks
-        (bool isFrozen, uint256 fundsLost) = securedVault.reportHack();
-
-        Policy storage policy_ = currentUserPolicy[_user];
+        (bool isFrozen, uint256 fundsLost) = securedVault_.reportHack();
 
         // If the account is frozen or funds were lost, reject the policy for security reasons
-        if (isFrozen || fundsLost > 0) {
-            revert InsurancePolicy_HackDetected(); // Revert if any suspicious activity was detected
+        if (!isFrozen || fundsLost <= 0) {
+            return 0;
         }
 
         // Otherwise, approve the policy
         policy_.status = PolicyStatus.Approved;
         emit PolicyReviewed(policy_.id, PolicyStatus.Approved); // Emit event for policy approval
+
+        return fundsLost;
     }
 
     /**
@@ -197,7 +210,9 @@ contract InsuranceManager {
      */
     function checkPolicyValidity(address _user) public view returns (bool) {
         Policy memory policy = currentUserPolicy[_user];
-        return policy.active && (block.timestamp <= policy.startTime + policy.period); // Check if policy is active and within the time frame
+        return
+            policy.active &&
+            (block.timestamp <= policy.startTime + policy.period); // Check if policy is active and within the time frame
     }
 
     /**
@@ -222,7 +237,6 @@ contract InsuranceManager {
      * @param coverageAmount_ The coverage amount of the policy
      */
 
-
     // Calculate premium based on coverage and risk
     function _calculatePremium(
         uint256 coverageAmount_,
@@ -231,25 +245,31 @@ contract InsuranceManager {
         uint256 basePercentageInBIPs = 1000; // 10% in BIPs (1000 / 10,000)
 
         // Calculate premium based on coverage amount, period, and percentage
-        uint256 premium = (coverageAmount_ * basePercentageInBIPs * period_) / (10000 * 365);
+        uint256 premium = (coverageAmount_ * basePercentageInBIPs * period_) /
+            (10000 * 365);
 
         return premium;
     }
 
-    function getPremiumFee(uint256 coverageAmount_, uint256 period_) pure external returns(uint256){
+    function getPremiumFee(
+        uint256 coverageAmount_,
+        uint256 period_
+    ) external pure returns (uint256) {
         return _calculatePremium(coverageAmount_, period_);
     }
 
-    function  _vaultHackCheck(Policy memory policy_, SecuredVault securedVault) internal{
-        
+    function _vaultHackCheck(
+        Policy memory policy_,
+        SecuredVault securedVault
+    ) internal {
         (bool isFrozen, uint256 lostFunds) = securedVault.reportHack();
 
-        if(!isFrozen && lostFunds == 0){
+        if (!isFrozen && lostFunds == 0) {
             policy_.status = PolicyStatus.Approved;
-        } else if(!isFrozen){
+        } else if (!isFrozen) {
             policy_.status = PolicyStatus.Pending;
         }
-        
+
         if (policy_.status != PolicyStatus.Approved) {
             revert InsurancePolicy_NotApproved();
         }
