@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import  managerABI  from '../../contractData/Manager';
 import  securedVaultABI  from '../../contractData/SecuredVault';
 
-const MANAGER_CONTRACT_ADDRESS = '0x...'; // Replace with the actual contract address
+const MANAGER_CONTRACT_ADDRESS = '0x8690c9e8329aeEB65bB5ad299fD4B6d67882C05D'; // Replace with the actual contract address
 
 export function SecuredVault({vaultAddress, userAddress }: { vaultAddress: `0x${string}`, userAddress: `0x${string}` }) {
   const [depositAmount, setDepositAmount] = useState('')
