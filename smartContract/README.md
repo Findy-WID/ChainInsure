@@ -26,6 +26,13 @@ This repository contains multiple smart contracts designed to work together, inc
 
 ---
 
+```bash
+ManagerModule#Manager - 0x8690c9e8329aeEB65bB5ad299fD4B6d67882C05D
+SecuredVaultModule#SecuredVault - 0x9D3AEaE603Ac0482a04898919f20a4E318B99Cf8
+InsuranceModule#InsuranceManager - 0x6D0ceF6a337bF944bc4E002b91D445dE6E28aD08
+StakinPoolModule#StakingPool - 0x9b87EfDFcB734243E483f447d73EccC128023839
+```
+
 ## **Contracts Overview**
 - **Manager**: Responsible for managing vault addresses for users and connecting vaults with the insurance mechanism.
 - **SecuredVault**: Holds user assets and implements hack detection and freezing mechanisms to secure funds.
