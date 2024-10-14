@@ -4,14 +4,14 @@ pragma solidity ^0.8.24;
 import {console} from "../../lib/forge-std/src/Test.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {DataTypes} from "@aave/core-v3/contracts/protocol/libraries/types/DataTypes.sol";
-import {SampleERC20} from "../mocks/SampleERC20.sol";
-
-contract MockPool {
+import {WETH9} from "../mocks/SampleERC20.sol";
+// import {IPool} from "@aave/core-v3/contracts/interfaces/IPool.sol";
+contract MockPool{
     struct Reserve {
         uint256 liquidity;
         address aTokenAddress; // Address of the corresponding aToken for this asset
     }
-
+    
     mapping(address => Reserve) public reserves;
 
     constructor(address[] memory assets, address[] memory aTokens) {
@@ -29,10 +29,12 @@ contract MockPool {
         address onBehalfOf,
         uint16 referralCode
     ) external {
-        IERC20(asset).transferFrom(msg.sender, address(this), amount);
+        if(referralCode>0){}
+        WETH9(payable(asset)).transferFrom(msg.sender, address(this), amount);
         reserves[asset].liquidity += amount;
+
         // Optionally simulate aToken credit to onBehalfOf account
-        SampleERC20(reserves[asset].aTokenAddress).mint(onBehalfOf, amount);
+        WETH9(payable(reserves[asset].aTokenAddress)).mint(onBehalfOf, amount);
     }
 
     function withdraw(
@@ -42,8 +44,8 @@ contract MockPool {
     ) external returns (uint256) {
         require(reserves[asset].liquidity >= amount, "Insufficient liquidity");
         reserves[asset].liquidity -= amount;
-        SampleERC20(reserves[asset].aTokenAddress).burn(msg.sender, amount);
-        IERC20(asset).transfer(to, amount);
+        // WETH9(reserves[asset].aTokenAddress).burn(msg.sender, amount);
+        WETH9(payable(asset)).transfer(to, amount);
         return amount;
     }
 

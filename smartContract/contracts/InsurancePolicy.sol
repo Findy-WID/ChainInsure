@@ -38,7 +38,7 @@ contract InsuranceManager {
     // Mapping from user address to their active policy
     mapping(address => Policy) public currentUserPolicy;
 
-    YieldManager public yielManager;    // Instance of YieldManager for yield-bearing operations
+    // YieldManager public yielManager;    // Instance of YieldManager for yield-bearing operations
     // IERC20 public paymentToken;         // Token used for policy payments (e.g., DAI, USDC, etc.)
 
     // Events to log important actions
@@ -55,7 +55,8 @@ contract InsuranceManager {
     error InsurancePolicy_InvalidValue(uint256 value);
     error InsurancePolicy_InvalidPolicyStatus();
     error InsurancePolicy_NotApproved();
-    error InsurancePolicy_InsufficientFunds();
+    error InsurancePolicy_InsufficientFunds(uint256 _balance);
+    error InsurancePolicy_PaymentUnsuccessful();
     error InsurancePolicy_HackDetected();
 
     // Modifier to restrict actions to the policy owner
@@ -86,18 +87,26 @@ contract InsuranceManager {
     /**
      * @notice Create a new insurance policy for the caller
      * @param _coverageAmount Amount to be insured
-     * @param _premium Premium to be paid for the policy
      * @param _period Duration of the policy in days
      * @return The ID of the created policy
      */
-    function createPolicy(uint256 _coverageAmount, uint256 _premium, uint256 _period) payable external returns (uint256) {
+    function createPolicy(uint256 _coverageAmount, uint256 _period) external payable returns (uint256)  {
         if (_coverageAmount < MIN_VALUE || _coverageAmount > MAX_VALUE) {
             revert InsurancePolicy_InvalidValue(_coverageAmount); // Ensure coverage is within valid limits
         }
+        
+        uint256 _premium = _calculatePremium(_coverageAmount, _period);
+
+        if (_premium > msg.value){
+            revert InsurancePolicy_InsufficientFunds(_premium);
+        }
+
+
         if (currentUserPolicy[msg.sender].active) {
             revert InsurancePolicy_ExistingPolicyIsActive(); // Only one active policy per user allowed
         }
 
+        // payable(address(this)).call{value: }
         // Create a new policy for the user
         Policy memory newPolicy = Policy({
             id: nextPolicyId,
@@ -133,7 +142,7 @@ contract InsuranceManager {
         // Check if there are enough funds in the vault and withdraw them
         (bool success, ) = msg.sender.call{value: securedVault.getBalance()}("");
         if (!success) {
-            revert InsurancePolicy_InsufficientFunds(); // Revert if withdrawal fails
+            revert InsurancePolicy_PaymentUnsuccessful(); // Revert if withdrawal fails
         }
 
         policy_.status = PolicyStatus.Claimed; // Mark policy as claimed
@@ -216,12 +225,20 @@ contract InsuranceManager {
 
 
     // Calculate premium based on coverage and risk
-    function _calculatePremium(uint256 coverageAmount_, uint256 risk_) internal pure returns (uint256) {
-        uint256 basePercentageInBIPs = 100;
-        uint256 additionalPercentageInBIPs = (200 * risk_) / 100;
-        uint256 totalPercentage = basePercentageInBIPs + additionalPercentageInBIPs;
-        uint256 premium = (coverageAmount_ * totalPercentage) / 10000;
+    function _calculatePremium(
+        uint256 coverageAmount_,
+        uint256 period_ // Period in days
+    ) internal pure returns (uint256) {
+        uint256 basePercentageInBIPs = 1000; // 10% in BIPs (1000 / 10,000)
+
+        // Calculate premium based on coverage amount, period, and percentage
+        uint256 premium = (coverageAmount_ * basePercentageInBIPs * period_) / (10000 * 365);
+
         return premium;
+    }
+
+    function getPremiumFee(uint256 coverageAmount_, uint256 period_) pure external returns(uint256){
+        return _calculatePremium(coverageAmount_, period_);
     }
 
     function  _vaultHackCheck(Policy memory policy_, SecuredVault securedVault) internal{
