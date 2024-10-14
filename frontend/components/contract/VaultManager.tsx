@@ -1,17 +1,29 @@
-'use client'
+
+
+
+/**
+|--------------------------------------------------
+| max limit 1000eth min 0.001eth
+2 add icon to mke the word visible 
+
+|--------------------------------------------------
+*/
+
+
+
+
 
 import { useState } from 'react';
 import { useAccount, useWriteContract, useReadContract } from 'wagmi';
-import { parseEther } from 'viem';
+import { formatEther, parseEther } from 'viem';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 
-import  managerABI  from '../../contractData/Manager';
-import  securedVaultABI  from '../../contractData/SecuredVault';
-// import { wagmiConfig } from '@/wagmi';
-import { getBalance } from 'viem/actions';
+import managerABI from '../../contractData/Manager';
+import { SecuredVault } from './SecuredVault';
 
 const MANAGER_CONTRACT_ADDRESS = '0x8690c9e8329aeEB65bB5ad299fD4B6d67882C05D'; // Replace with the actual contract address
 
@@ -37,11 +49,6 @@ export default function VaultManager() {
     args: [address] as any,
   });
 
-  // const balance = getBalance(wagmiConfig as any, {
-  //   address: vaultAddress as any,
-  //   unit: 'ether' as const, 
-  // })
-
   const handleCreateVault = () => {
     if (address && threshold && secret) {
       writeContract({
@@ -49,10 +56,9 @@ export default function VaultManager() {
         abi: managerABI,
         functionName: 'createVault',
         args: [address, parseEther(threshold), secret],
-      })
+      });
     }
   };
-
 
   const handleWithdraw = () => {
     if (address && withdrawAddress && withdrawAmount) {
@@ -60,8 +66,8 @@ export default function VaultManager() {
         address: MANAGER_CONTRACT_ADDRESS,
         abi: managerABI,
         functionName: 'withdrawFunds',
-        args: [address, withdrawAddress as any, parseEther(withdrawAmount) as any]
-      })
+        args: [address, withdrawAddress as any, parseEther(withdrawAmount) as any],
+      });
     }
   };
 
@@ -95,13 +101,8 @@ export default function VaultManager() {
           </div>
         </CardContent>
         <CardFooter>
-          <Button onClick={handleCreateVault} 
-          // disabled={isCreatingVault}
-          >
-            {
-            // isCreatingVault ? 
-            // 'Creating...' : 
-            'Create Vault'}
+          <Button onClick={handleCreateVault}>
+            Create Vault
           </Button>
         </CardFooter>
       </Card>
@@ -113,49 +114,14 @@ export default function VaultManager() {
           </CardHeader>
           <CardContent>
             <p>Vault Address: {vaultAddress}</p>
-            <p>Balance: {vaultBalance ? `${parseEther(vaultBalance.toString())} ETH` : '0 ETH'}</p>
+            {/* <p>Balance: {vaultBalance ? `${parseEther(vaultBalance.toString())} ETH` : '0 ETH'}</p> */}
+            <p>Balance: {vaultBalance ? `${formatEther(vaultBalance)} ETH` : '0 ETH'}</p>
+
           </CardContent>
         </Card>
       )}
-
-      {vaultAddress && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Withdraw Funds</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="withdrawAddress">Recipient Address</Label>
-              <Input
-                id="withdrawAddress"
-                value={withdrawAddress}
-                onChange={(e) => setWithdrawAddress(e.target.value)}
-                placeholder="Enter recipient address"
-              />
-            </div>
-            <div>
-              <Label htmlFor="withdrawAmount">Amount (ETH)</Label>
-              <Input
-                id="withdrawAmount"
-                type="number"
-                value={withdrawAmount}
-                onChange={(e) => setWithdrawAmount(e.target.value)}
-                placeholder="Enter amount to withdraw"
-              />
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button onClick={handleWithdraw} 
-            // disabled={isWithdrawing}
-            >
-              {
-              // isWithdrawing ? 
-              // 'Withdrawing...' : 
-              'Withdraw'
-              }
-            </Button>
-          </CardFooter>
-        </Card>
+      {vaultAddress && address && (
+        <SecuredVault vaultAddress={vaultAddress} userAddress={address} />
       )}
     </div>
   );

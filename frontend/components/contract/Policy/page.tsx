@@ -40,7 +40,7 @@ export default function Home() {
         </div>
         <div>
           <h2 className="text-2xl font-semibold mb-4">Your Secured Vault</h2>
-          <SecuredVault userAddress={address!} />
+          {/* <SecuredVault userAddress={address!} /> */}
         </div>
       </div>
     </div>

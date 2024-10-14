@@ -6,8 +6,8 @@ import { parseEther } from 'viem'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { insuranceManagerABI } from '@/lib/contractABI'
 import { toast } from 'sonner'
+import { insuranceManagerABI } from '@/contractData/insuranceManagerABI';
 
 const contractAddress = '0x...' // Replace with your contract address
 const MIN_VALUE = parseEther('1')
@@ -25,7 +25,7 @@ export function CreatePolicy() {
     args: [parseEther(coverageAmount || '0'), parseEther(premium || '0'), BigInt(period || '0')],
   })
 
-  const { write, isLoading, isSuccess, isError } = useContractWrite(config)
+  const { write, isPending, isSuccess, isError } = useContractWrite(config)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,7 +37,7 @@ export function CreatePolicy() {
     write?.()
   }
 
-  if (isLoading) {
+  if (isPending) {
     toast.loading('Creating policy...')
   }
 

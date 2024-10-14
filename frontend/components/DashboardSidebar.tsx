@@ -27,12 +27,13 @@ const navLinks = [
 ]
 
 export function DashboardSidebar() {
+    
   return (
     <aside className="w-64 h-screen bg-[#0C0E1A] text-white flex flex-col justify-between p-6 space-y-2 font-sans">
         
             {/*Logo */}
-            <div className="mb-6">
-                <Image src='/images/logo.png' alt='logo' width={200} height={200}/>
+            <div className="mb-6 w-full flex items-center justify-center mt-2">
+                <Image src='/images/logo-white.svg' alt='logo' width={100} height={50}/>
             </div>
 
             {/*nav */}
