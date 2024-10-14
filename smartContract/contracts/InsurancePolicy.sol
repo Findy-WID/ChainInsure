@@ -136,7 +136,6 @@ contract InsuranceManager {
         if (policy_.status != PolicyStatus.Approved) {
             revert InsurancePolicy_NotApproved(); // Only approved policies can be claimed
         }
-
         SecuredVault securedVault = SecuredVault(manager.getVaultAddress(msg.sender));
 
         // Check if there are enough funds in the vault and withdraw them
@@ -170,10 +169,10 @@ contract InsuranceManager {
 
     /**
      * @notice Approve the policy after verifying no suspicious behavior or hack
-     * @param _user The address of the policyholder to approve
      * @dev Integrates with the SecuredVault's `reportHack` function to check for hacks or account freezing
      */
-    function approvePolicy(address _user) external validPolicyOwner(_user) {
+    function _approvePolicy() internal  {
+        address _user = msg.sender;
         SecuredVault securedVault = SecuredVault(manager.getVaultAddress(_user));
 
         // Call `reportHack` from the SecuredVault contract to detect any hacks
