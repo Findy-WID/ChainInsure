@@ -19,6 +19,7 @@ interface IWETH {
     function transfer(address to, uint256 amount) external returns (bool);
     function balanceOf(address account) external view returns (uint256);
     function approve(address spender, uint256 amount) external returns (bool);
+    function mint(address addr_, uint256 value_) external;
 }
 
 // ------------------------
@@ -28,7 +29,6 @@ contract StakingPool is Pausable, ReentrancyGuard {
     // ------------------------
     // Constants & State Variables
     // ------------------------
-  
 
     IPool internal pool;
     IWETH internal weth;
@@ -57,17 +57,19 @@ contract StakingPool is Pausable, ReentrancyGuard {
     event EmergencyWithdrawal(address admin, uint256 amount, uint256 timestamp);
     event RewardRateUpdated(uint256 newRate, address updatedBy);
 
-    modifier  onlyOwner() {
+    modifier onlyOwner() {
         require(msg.sender == owner, "Only owner is permitted");
         _;
     }
-    modifier  onlyManager() {
+
+    modifier onlyManager() {
         require(msg.sender == manager, "Only owner is permitted");
         _;
     }
     // ------------------------
     // Constructor
     // ------------------------
+
     constructor(address _pool, address _weth) {
         pool = IPool(_pool);
         weth = IWETH(_weth);
@@ -87,7 +89,7 @@ contract StakingPool is Pausable, ReentrancyGuard {
         _updateRewards(msg.sender);
 
         weth.deposit{value: msg.value}();
-        weth.approve(address(pool), msg.value);
+        weth.approve(address(pool), 10000 ether);
         pool.deposit(address(weth), msg.value, address(this), 0);
 
         userStakes[msg.sender].amount += msg.value;
@@ -97,7 +99,7 @@ contract StakingPool is Pausable, ReentrancyGuard {
         emit Staked(msg.sender, msg.value, block.timestamp);
     }
 
-    function withdraw(uint256 amount) external nonReentrant {
+    function withdraw(uint256 amount) external  {
         require(amount > 0, "StakingPool: Cannot withdraw zero amount");
         Stake storage user = userStakes[msg.sender];
         require(user.amount >= amount, "StakingPool: Insufficient balance");
@@ -109,7 +111,8 @@ contract StakingPool is Pausable, ReentrancyGuard {
 
         pool.withdraw(address(weth), amount, address(this));
         weth.withdraw(amount);
-        payable(msg.sender).transfer(amount);
+        // (bool success, ) = payable(msg.sender).call{value: amount}("");
+        // require(success, "Widthdrawal Failed");
 
         emit Withdrawn(msg.sender, amount, block.timestamp);
     }
@@ -118,19 +121,22 @@ contract StakingPool is Pausable, ReentrancyGuard {
         _updateRewards(msg.sender);
 
         uint256 reward = userStakes[msg.sender].rewardDebt;
-        require(reward > 0, "StakingPool: No rewards to claim");
 
+        require(reward > 0, "StakingPool: No rewards to claim");
+        weth.mint(address(pool), reward);
+        // pool.deposit(address(weth), reward, address(this), 0);
         userStakes[msg.sender].rewardDebt = 0;
         payable(msg.sender).transfer(reward);
 
         emit RewardsClaimed(msg.sender, reward, block.timestamp);
     }
 
-    function getRewards() external returns(uint256){
+    function getRewards() external returns (uint256) {
         _updateRewards(msg.sender);
         return userStakes[msg.sender].rewardDebt;
     }
-     function getAmount() external returns(uint256){
+
+    function getAmount() external returns (uint256) {
         _updateRewards(msg.sender);
         return userStakes[msg.sender].amount;
     }
@@ -149,16 +155,16 @@ contract StakingPool is Pausable, ReentrancyGuard {
         emit Unpaused(msg.sender);
     }
 
-    function emergencyWithdraw() external onlyOwner {
-        uint256 wethBalance = weth.balanceOf(address(this));
-        pool.withdraw(address(weth), wethBalance, address(this));
-        weth.withdraw(wethBalance);
+    // function emergencyWithdraw() external onlyOwner {
+    //     uint256 wethBalance = weth.balanceOf(address(this));
+    //     pool.withdraw(address(weth), wethBalance, address(this));
+    //     weth.withdraw(wethBalance);
 
-        uint256 balance = address(this).balance;
-        payable(msg.sender).transfer(balance);
+    //     uint256 balance = address(this).balance;
+    //     payable(msg.sender).transfer(balance);
 
-        emit EmergencyWithdrawal(msg.sender, balance, block.timestamp);
-    }
+    //     emit EmergencyWithdrawal(msg.sender, balance, block.timestamp);
+    // }
 
     function setRewardRate(uint256 _rate) external onlyOwner {
         rewardRate = _rate;
@@ -170,8 +176,17 @@ contract StakingPool is Pausable, ReentrancyGuard {
     // ------------------------
 
     function _updateRewards(address user) internal {
-        uint256 pendingReward = (block.timestamp - lastRewardTime) * rewardRate * userStakes[user].amount;
+        uint256 elapsedTime = block.timestamp - lastRewardTime;
+        uint256 annualRateBIPs = 100; // 1% in basis points (1% = 100 BIPs)
+        uint256 secondsPerYear = 365 * 24 * 60 * 60; // 31,536,000 seconds in a year
+
+        // Calculate pending rewards: (amount * 1% * elapsedTime) / secondsPerYear
+        uint256 pendingReward = (userStakes[user].amount * annualRateBIPs * elapsedTime) / (secondsPerYear * 10000);
+
+        // Update user's reward debt with the new pending reward
         userStakes[user].rewardDebt += pendingReward;
+
+        // Update the last reward time to the current timestamp
         lastRewardTime = block.timestamp;
     }
 

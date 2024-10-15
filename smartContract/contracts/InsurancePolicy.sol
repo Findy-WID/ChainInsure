@@ -13,6 +13,7 @@ contract InsuranceManager {
         Approved, // Policy is approved and active
         Rejected, // Policy is rejected
         Claimed // Policy has been claimed by the owner
+
     }
 
     // Structure representing an insurance policy
@@ -41,11 +42,7 @@ contract InsuranceManager {
     // IERC20 public paymentToken;         // Token used for policy payments (e.g., DAI, USDC, etc.)
 
     // Events to log important actions
-    event PolicyCreated(
-        address indexed user,
-        uint256 insuredAmount,
-        uint256 premium
-    );
+    event PolicyCreated(address indexed user, uint256 insuredAmount, uint256 premium);
     event PolicyReviewed(uint256 indexed policyId, PolicyStatus status);
     event PolicyCancelled(address indexed user);
     event PolicyActivated(uint256 indexed policyId);
@@ -94,10 +91,7 @@ contract InsuranceManager {
      * @param _period Duration of the policy in days
      * @return The ID of the created policy
      */
-    function createPolicy(
-        uint256 _coverageAmount,
-        uint256 _period
-    ) external payable returns (uint256) {
+    function createPolicy(uint256 _coverageAmount, uint256 _period) external payable returns (uint256) {
         if (_coverageAmount < MIN_VALUE || _coverageAmount > MAX_VALUE) {
             revert InsurancePolicy_InvalidValue(_coverageAmount); // Ensure coverage is within valid limits
         }
@@ -136,22 +130,22 @@ contract InsuranceManager {
      * @notice Claim the policy payout if approved
      * @dev The policy must be in `Approved` status for the claim to be processed
      */
-    function claimPolicy() external onlyPolicyOwner {
+    function claimPolicy(address vaultAddress_) external onlyPolicyOwner {
         Policy memory policy_ = currentUserPolicy[msg.sender];
-        SecuredVault vaultAddress = manager.getVaultAddress(msg.sender);
+        SecuredVault vaultAddress = SecuredVault(payable(vaultAddress_));
         if (!policy_.active) {
             revert InsurancePolicy_NoActivePolicy();
         }
         SecuredVault securedVault = SecuredVault(vaultAddress);
 
-        uint lostFunds = _approvePolicy(securedVault, policy_);
+        uint256 lostFunds = _approvePolicy(securedVault, policy_);
 
         if (policy_.status != PolicyStatus.Approved) {
             revert InsurancePolicy_NotApproved(); // Only approved policies can be claimed
         }
 
         // Check if there are enough funds in the vault and withdraw them
-        (bool success, ) = msg.sender.call{value: lostFunds}("");
+        (bool success,) = msg.sender.call{value: lostFunds}("");
 
         if (!success) {
             revert InsurancePolicy_PaymentUnsuccessful(); // Revert if withdrawal fails
@@ -184,10 +178,7 @@ contract InsuranceManager {
      * @notice Approve the policy after verifying no suspicious behavior or hack
      * @dev Integrates with the SecuredVault's `reportHack` function to check for hacks or account freezing
      */
-    function _approvePolicy(
-        SecuredVault securedVault_,
-        Policy memory policy_
-    ) internal returns (uint256) {
+    function _approvePolicy(SecuredVault securedVault_, Policy memory policy_) public returns (uint256) {
         // Call `reportHack` from the SecuredVault contract to detect any hacks
         (bool isFrozen, uint256 fundsLost) = securedVault_.reportHack();
 
@@ -210,9 +201,7 @@ contract InsuranceManager {
      */
     function checkPolicyValidity(address _user) public view returns (bool) {
         Policy memory policy = currentUserPolicy[_user];
-        return
-            policy.active &&
-            (block.timestamp <= policy.startTime + policy.period); // Check if policy is active and within the time frame
+        return policy.active && (block.timestamp <= policy.startTime + policy.period); // Check if policy is active and within the time frame
     }
 
     /**
@@ -245,23 +234,16 @@ contract InsuranceManager {
         uint256 basePercentageInBIPs = 1000; // 10% in BIPs (1000 / 10,000)
 
         // Calculate premium based on coverage amount, period, and percentage
-        uint256 premium = (coverageAmount_ * basePercentageInBIPs * period_) /
-            (10000 * 365);
+        uint256 premium = (coverageAmount_ * basePercentageInBIPs * period_) / (10000 * 365);
 
         return premium;
     }
 
-    function getPremiumFee(
-        uint256 coverageAmount_,
-        uint256 period_
-    ) external pure returns (uint256) {
+    function getPremiumFee(uint256 coverageAmount_, uint256 period_) external pure returns (uint256) {
         return _calculatePremium(coverageAmount_, period_);
     }
 
-    function _vaultHackCheck(
-        Policy memory policy_,
-        SecuredVault securedVault
-    ) internal {
+    function _vaultHackCheck(Policy memory policy_, SecuredVault securedVault) internal {
         (bool isFrozen, uint256 lostFunds) = securedVault.reportHack();
 
         if (!isFrozen && lostFunds == 0) {

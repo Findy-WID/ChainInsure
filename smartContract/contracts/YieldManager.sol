@@ -18,25 +18,24 @@ import {DataTypes} from "@aave/core-v3/contracts/protocol/libraries/types/DataTy
 // ------------------------
 
 contract YieldManager is AccessControlEnumerable {
-
     // ------------------------
     // Type Declarations
     // ------------------------
-    
+
     // ------------------------
     // State Variables
     // ------------------------
     bytes32 public constant MANAGER_CONTRACT = keccak256("MANAGER_CONTRACT");
 
-    IPool public pool;                // Aave Pool interface
-    IERC20 public paymentToken;       // Token to be deposited in Aave
-    address public aTokenAddress;     // Aave aToken address for the deposit
-    address public managerContract;   // Manager contract address
+    IPool public pool; // Aave Pool interface
+    IERC20 public paymentToken; // Token to be deposited in Aave
+    address public aTokenAddress; // Aave aToken address for the deposit
+    address public managerContract; // Manager contract address
 
     // ------------------------
     // Events
     // ------------------------
-    
+
     // ------------------------
     // Modifiers
     // ------------------------
@@ -56,7 +55,7 @@ contract YieldManager is AccessControlEnumerable {
     // ------------------------
     // External Functions
     // ------------------------
-    
+
     /**
      * @notice Deposits tokens into Aave to earn interest
      * @param amount_ The amount of tokens to be deposited.
@@ -81,7 +80,7 @@ contract YieldManager is AccessControlEnumerable {
     // ------------------------
     // Public Functions
     // ------------------------
-    
+
     /**
      * @notice Gets the available balance of aTokens
      * @return The balance of aTokens held by the contract
