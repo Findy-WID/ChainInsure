@@ -41,3 +41,7 @@ export function PolicyDetails({ address }: { address: `0x${string}` }) {
     </Card>
   )
 }
+
+
+
+// staking contract
