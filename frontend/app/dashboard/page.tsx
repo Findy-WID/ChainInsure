@@ -11,6 +11,8 @@ import { useEffect } from 'react'
 import Home from "@/components/contract/Policy/page";
 import VaultManager from "@/components/contract/VaultManager";
 import { SecuredVault } from "@/components/contract/SecuredVault";
+import { PolicyDetails } from "@/components/contract/Policy/PolicyDetail";
+import { CreatePolicy } from "@/components/contract/Policy/CreatePolicy";
 
 
 function Dashboard () {
@@ -34,6 +36,8 @@ function Dashboard () {
                     <DashboardCards/>
                     <DashboardTable/>
                     <VaultManager />
+                    {/* <PolicyDetails /> */}
+                    <CreatePolicy />
                     {/* <SecuredVault /> */}
                     {/* <Home/> */}
                 </div>
