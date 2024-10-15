@@ -3,6 +3,8 @@ import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans, Instrument_Serif } from 'next/font/google';
 import OnchainProvider from '../providers/OnchainProvider';
 import "@coinbase/onchainkit/styles.css";
+import { Toaster } from "@/components/ui/sonner"
+
 
 const plusJakartaSans = Plus_Jakarta_Sans({ subsets: ['latin'] });
 // const instrumentSerif = Instrument_Serif({
@@ -25,7 +27,9 @@ export default function RootLayout({
     <html lang="en">
       {/* <body className={`${plusJakartaSans.className} ${instrumentSerif.variable}`}> */}
       <body className={plusJakartaSans.className}>
+        
         <OnchainProvider>{children}</OnchainProvider>
+        <Toaster />
       </body>
     </html>
   );

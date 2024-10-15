@@ -44,18 +44,29 @@ export function StakingPool() {
     value: stakeAmount ? parseEther(stakeAmount) : undefined,
   })
 
-  const { data: stake, isPending: isStaking } = useWriteContract(stakeConfig)
-  const { data: withdrawConfig } = useWriteContract({
+  const { data: stake, isPending: isStaking } = useWriteContract({
+    address: stakingPoolAddress,
+    abi: stakingPoolABI,
+    functionName: 'stake',
+    value: stakeAmount ? parseEther(stakeAmount) : undefined,
+  })
+  const { data: withdrawData, isPending: isWithdrawingData } = useWriteContract({
     abi: stakingPoolABI,
     functionName: 'withdraw',
     args: [withdrawAmount ? parseEther(withdrawAmount) : BigInt(0)],
   })
 
-  const { data: withdraw, isPending: isWithdrawing } = useWriteContract(withdrawConfig)
-
-  const { data: claimRewardsConfig } = useWriteContract({
+  const { data: withdraw, isPending: isWithdrawing } = useWriteContract({
     address: stakingPoolAddress,
     abi: stakingPoolABI,
+    functionName: 'withdraw',
+    args: [withdrawAmount ? parseEther(withdrawAmount) : BigInt(0)],
+  })
+
+  const { data: claimRewards, isPending: isClaiming } = useWriteContract({
+    address: stakingPoolAddress,
+    abi: stakingPoolABI,
+    functionName: 'claimRewards',
     functionName: 'claimRewards',
   })
 
