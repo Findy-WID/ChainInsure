@@ -5,28 +5,32 @@ import { LayoutDashboard, CircleStop, House, MapPin, Phone} from 'lucide-react'
 
 const navLinks = [
     {
-        icon:<LayoutDashboard/>, text:'Dashboard'
+        icon:<LayoutDashboard/>, text:'Dashboard', section:'dashboard'
     },
     {
         icon: <CircleStop />,
-        text: 'Insurance'
+        text: 'Insurance', 
+        section:'insurance',
     },
     {
         icon:<CircleStop/>,
-        text:'Vault'
+        text:'Vault',
+        section:'vault',
     },
     {
         icon:<CircleStop/>,
-        text:'Staking'
+        text:'Staking',
+        section:'staking',
     },
     {
         icon:<House />,
-        text:'Home'
+        text:'Home',
+        section:'home'
     },
     
 ]
 
-export function DashboardSidebar() {
+export function DashboardSidebar({onButtonClick}:{onButtonClick:(section:string) => void}) {
     
   return (
     <aside className="w-64 h-screen bg-[#0C0E1A] text-white flex flex-col justify-between p-6 space-y-2 font-sans">
@@ -41,7 +45,7 @@ export function DashboardSidebar() {
             <nav>
                 {navLinks.map((item, index)=>{
                     return (
-                        <button key={index}className='pl-6 mb-4'>
+                        <button key={index} onClick={()=>onButtonClick(item.section)}className='pl-6 mb-4'>
                             <ul>
                             <li className="flex     items-center space-x-4">
                             {item.icon}
