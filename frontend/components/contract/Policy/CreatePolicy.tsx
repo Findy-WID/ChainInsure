@@ -1,15 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { useContractWrite, usePrepareContractWrite } from 'wagmi'
+import { useContractWrite, useSimulateContract, useWriteContract } from 'wagmi'
 import { parseEther } from 'viem'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { insuranceManagerABI } from '@/contractData/insuranceManagerABI';
+import insuranceManager from '@/contractData/InsuranceManager';
 
-const contractAddress = '0x...' // Replace with your contract address
+const contractAddress = '0x6D0ceF6a337bF944bc4E002b91D445dE6E28aD08' // Replace with your contract address
 const MIN_VALUE = parseEther('1')
 const MAX_VALUE = parseEther('1000000')
 
@@ -18,16 +18,16 @@ export function CreatePolicy() {
   const [premium, setPremium] = useState('')
   const [period, setPeriod] = useState('')
 
-  const { config } = usePrepareContractWrite({
+  const { data } = useSimulateContract({
     address: contractAddress,
-    abi: insuranceManagerABI,
+    abi: insuranceManager,
     functionName: 'createPolicy',
     args: [parseEther(coverageAmount || '0'), parseEther(premium || '0'), BigInt(period || '0')],
   })
 
-  const { write, isPending, isSuccess, isError } = useContractWrite(config)
+  const { write, isPending, isSuccess, isError } = useWriteContract(data)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const coverageEther = parseEther(coverageAmount)
     if (coverageEther < MIN_VALUE || coverageEther > MAX_VALUE) {
