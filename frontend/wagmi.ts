@@ -14,8 +14,6 @@ export const wagmiConfig = createConfig({
   ],
   // ssr: true,
   transports: {
-    // [base.id]: http(),
-    
     [baseSepolia.id]: http(),
   },
 });

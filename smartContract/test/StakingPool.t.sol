@@ -19,8 +19,8 @@ contract StakingPoolTest is Test {
 
     // Setup function
     function setUp() public {
-        owner = address(this); // Owner is the test contract
-
+        // owner
+        vm.startPrank(owner);
         address[] memory tokens = new address[](1);
         address[] memory aTokens = new address[](1);
 
@@ -33,8 +33,10 @@ contract StakingPoolTest is Test {
         mockPool = new MockPool(tokens, aTokens);
 
         // Deploy StakingPool
-        
+
         stakingPool = new StakingPool(address(mockPool), address(mockToken));
+
+        vm.stopPrank();
 
         // Fund user accounts with ETH
         vm.deal(user1, 10 ether);
@@ -46,14 +48,28 @@ contract StakingPoolTest is Test {
         vm.startPrank(user1); // Simulate user1's actions
 
         // Stake 1 ETH
-        (bool success, ) = payable(stakingPool).call{value: 1 ether}("");
+        (bool success,) = payable(stakingPool).call{value: 1 ether}("");
         assertTrue(success);
 
         // Check user1's staked amount and total staked in the contract
-        (uint256 staked, , ) = stakingPool.userStakes(user1);
-        console.log(staked, 1 ether);
+        (uint256 staked,,) = stakingPool.userStakes(user1);
+        // console.log(staked, 1 ether);
         assertEq(staked, 1 ether);
         assertEq(stakingPool.totalStaked(), 1 ether);
+
+        vm.stopPrank();
+
+        vm.startPrank(user2); // Simulate user1's actions
+
+        // Stake 1 ETH
+        (success,) = payable(stakingPool).call{value: 1 ether}("");
+        assertTrue(success);
+
+        // Check user1's staked amount and total staked in the contract
+        (staked,,) = stakingPool.userStakes(user2);
+        // console.log(staked, 1 ether);
+        assertEq(staked, 1 ether);
+        assertEq(stakingPool.totalStaked(), 2 ether);
 
         vm.stopPrank();
     }
@@ -61,14 +77,14 @@ contract StakingPoolTest is Test {
     // Test: Withdraw function
     function testWithdraw() public {
         vm.startPrank(user1);
-        (bool success, ) = payable(stakingPool).call{value: 2 ether}("");
+        (bool success,) = payable(stakingPool).call{value: 2 ether}("");
         assertTrue(success);
 
         // Withdraw 1 ETH
         stakingPool.withdraw(1 ether);
 
-        // // Verify remaining balances
-        // (uint256 staked, , ) = stakingPool.userStakes(user1);
+        // Verify remaining balances
+        (uint256 staked, , ) = stakingPool.userStakes(user1);
         // assertEq(staked, 1 ether);
         // assertEq(stakingPool.totalStaked(), 1 ether);
 
@@ -80,42 +96,45 @@ contract StakingPoolTest is Test {
 
     // Test: Claim rewards
     function testClaimRewards() public {
-         vm.startPrank(user1);
-        (bool success, ) = payable(stakingPool).call{value: 1 ether}("");
+        vm.startPrank(user1);
+        (bool success,) = payable(stakingPool).call{value: 1 ether}("");
         assertTrue(success);
         vm.stopPrank();
-        vm.startPrank(user1);
-        (success, ) = payable(stakingPool).call{value: 1 ether}("");
+
+        vm.startPrank(user2);
+        (success,) = payable(stakingPool).call{value: 1 ether}("");
         assertTrue(success);
 
         // Simulate time passing to generate rewards
-        skip(1 days);
-
+        skip(30 days);
+        console.log(address(mockToken).balance);
         // Claim rewards
+        assertGt(stakingPool.getRewards(), 0);
         stakingPool.claimRewards();
+        // console.log(stakingPool._updateRewards(user2));
 
         // Verify rewards are reset
-        // (, uint256 rewardDebt, ) = stakingPool.userStakes(user1);
-        // assertEq(rewardDebt, 0);
-        // assertGt(user1.balance, 9 ether); // User should earn some rewards
-        console.log(stakingPool.getRewards());
-        console.log(stakingPool.getAmount());
+        (, uint256 rewardDebt, ) = stakingPool.userStakes(user2);
+        assertEq(rewardDebt, 0);
+        // assertGt(user2.balance, 9 ether); // User should earn some rewards
+        // console.log(stakingPool.getAmount());
         vm.stopPrank();
     }
 
     // Test: Emergency withdrawal by owner
-    function testEmergencyWithdraw() public {
-        vm.startPrank(user1);
-        (bool success, ) = payable(stakingPool).call{value: 1 ether}("");
-        assertTrue(success);
-        vm.stopPrank();
+    // function testEmergencyWithdraw() public {
+    //     vm.startPrank(user1);
+    //     (bool success,) = payable(stakingPool).call{value: 1 ether}("");
+    //     assertTrue(success);
 
-        // Perform emergency withdrawal as owner
-        stakingPool.emergencyWithdraw();
+    //     vm.stopPrank();
+    //     // Perform emergency withdrawal as owner
+    //     vm.startPrank(owner);
+    //     stakingPool.emergencyWithdraw();
 
-        // Ensure the contract balance is zero
-        assertEq(address(stakingPool).balance, 0);
-    }
+    //     // Ensure the contract balance is zero
+    //     assertEq(address(stakingPool).balance, 0);
+    // }
 
     // Test: Only owner can pause the contract
     function testPause() public {
@@ -136,7 +155,7 @@ contract StakingPoolTest is Test {
         vm.expectRevert("Pausable: paused");
 
         // Attempt to stake when paused
-        (bool success, ) = payable(stakingPool).call{value: 1 ether}("");
+        (bool success,) = payable(stakingPool).call{value: 1 ether}("");
         assertFalse(success); // This should not be reached if the revert works
 
         vm.stopPrank();

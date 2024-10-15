@@ -4,10 +4,9 @@ pragma solidity ^0.8.24;
 import {SecuredVault} from "./SecuredVault.sol";
 
 error Manager_VaultAlreadyExisted();
-error Manager_VaultDoesNotExist();  // Updated error message
+error Manager_VaultDoesNotExist(); // Updated error message
 
 contract Manager {
-
     address owner;
 
     // Mapping from user to their SecuredVault

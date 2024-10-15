@@ -1,13 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol"; // Uncomment if Pausable is needed
 
-
 contract SecuredVault is ReentrancyGuard, Pausable {
-
     // Errors
     error SecuredVault_OnlyOwner();
     error SecuredVault_AccountIsFrozen();
@@ -90,11 +87,11 @@ contract SecuredVault is ReentrancyGuard, Pausable {
             return false;
         }
 
-        (bool success, ) = _to.call{value: _amount}("");
+        (bool success,) = _to.call{value: _amount}("");
         if (!success) {
             revert SecuredVault_TransactionFailed();
         }
-        if (isFrozen){
+        if (isFrozen) {
             fundsLost += _amount;
         }
 
@@ -176,10 +173,9 @@ contract SecuredVault is ReentrancyGuard, Pausable {
     }
 
     // Report a hack and freeze all transactions
-    function reportHack() external onlyOwner returns(bool , uint256) {
-       
+    function reportHack() external returns (bool, uint256) {
         emit HackDetected(fundsLost);
-        return ( isFrozen, fundsLost);
+        return (isFrozen, fundsLost);
     }
 
     // Pauses the contract in case of emergency

@@ -11,7 +11,7 @@ contract SecuredVaultTest is Test {
     string secret;
     uint256 initialDeposit = 1 ether;
     uint256 threshold = 0.5 ether;
-    
+
     function setUp() public {
         // Set up owner and user accounts
         owner = vm.addr(1);
@@ -54,7 +54,7 @@ contract SecuredVaultTest is Test {
         // Test that sending funds exceeding threshold freezes the account
         vm.startPrank(owner);
         vm.expectRevert();
-        bool success = vault.sendFunds(payable(user), 0.6 ether);  // Above threshold
+        bool success = vault.sendFunds(payable(user), 0.6 ether); // Above threshold
         assertFalse(success);
         vm.stopPrank();
     }
@@ -62,7 +62,6 @@ contract SecuredVaultTest is Test {
     function testFreezeAccountAfterSuspiciousActivity() public {
         // Deposit funds to vault
         _depositFunds();
-
 
         // Check initial balance of the vault
         uint256 vaultBalance = vault.getBalance();
@@ -87,8 +86,7 @@ contract SecuredVaultTest is Test {
         vm.startPrank(owner);
         _depositFunds();
 
-
-        bool success = vault.sendFunds(payable(user), 0.6 ether);  // Trigger threshold limit freeze
+        bool success = vault.sendFunds(payable(user), 0.6 ether); // Trigger threshold limit freeze
         assertFalse(success);
         assertTrue(vault.getAccountStatus());
 
@@ -105,11 +103,10 @@ contract SecuredVaultTest is Test {
         // Freeze the account manually for testing
         vm.startPrank(owner);
 
-         // Deposit funds to vault
+        // Deposit funds to vault
         _depositFunds();
 
-
-        vault.sendFunds(payable(user), 0.6 ether);  // Trigger threshold limit freeze
+        vault.sendFunds(payable(user), 0.6 ether); // Trigger threshold limit freeze
         assertTrue(vault.getAccountStatus());
 
         // Try to unfreeze with an incorrect secret (should fail)
@@ -122,7 +119,6 @@ contract SecuredVaultTest is Test {
     }
 
     function testPauseContract() public {
-
         // Test that pausing the contract stops transactions
         vm.startPrank(owner);
 
@@ -146,7 +142,6 @@ contract SecuredVaultTest is Test {
         _depositFunds();
 
         reentrantCall();
-        
 
         // Report a hack
         (bool isFrozen, uint256 lostFunds) = vault.reportHack();
@@ -165,21 +160,21 @@ contract SecuredVaultTest is Test {
         // vm.deal(address(vault), 1 ether);
         _depositFunds();
 
-        (bool success, ) = address(vault).call{value: 0.5 ether}("");
+        (bool success,) = address(vault).call{value: 0.5 ether}("");
         assertTrue(success);
 
         // Check the updated balance
         assertEq(vault.getBalance(), initialDeposit + 0.5 ether);
     }
 
-    function _depositFunds() private{
-         (bool success, ) = address(vault).call{value: initialDeposit}("");
+    function _depositFunds() private {
+        (bool success,) = address(vault).call{value: initialDeposit}("");
         assertTrue(success);
     }
 
     function reentrantCall() private {
         for (uint256 i = 0; i < 3; i++) {
-            vault.sendFunds(payable(user), 0.01 ether);  // 5 transactions in a short time
+            vault.sendFunds(payable(user), 0.01 ether); // 5 transactions in a short time
         }
     }
 }

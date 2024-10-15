@@ -26,15 +26,14 @@ contract ManagerTest is Test {
     }
 
     function testCreateVault() public {
-
         vm.startPrank(owner);
         s_manager.createVault(owner, 10 ether, "test");
         s_manager.createVault(user, 10 ether, "test");
         SecuredVault securedVault1 = s_manager.getVaultAddress(owner);
         SecuredVault securedVault2 = s_manager.getVaultAddress(user);
 
-        (bool success, ) = address(securedVault1).call{value: 5 ether}("");
-        (success, ) = payable(securedVault2).call{value: 3 ether}("");
+        (bool success,) = address(securedVault1).call{value: 5 ether}("");
+        (success,) = payable(securedVault2).call{value: 3 ether}("");
         assert(securedVault1.getBalance() == 5 ether);
         assert(securedVault2.getBalance() == 3 ether);
         vm.stopPrank();
@@ -44,12 +43,12 @@ contract ManagerTest is Test {
         vm.startPrank(owner);
         s_manager.createVault(owner, 10 ether, "test");
         SecuredVault securedVault1 = s_manager.getVaultAddress(owner);
-        (bool success, ) = address(securedVault1).call{value: INITIAL_FUNDS}("");
+        (bool success,) = address(securedVault1).call{value: INITIAL_FUNDS}("");
 
         assertTrue(success);
         assert(securedVault1.getBalance() == INITIAL_FUNDS);
 
-        securedVault1.sendFunds( payable(user), 5 ether);
+        securedVault1.sendFunds(payable(user), 5 ether);
         // console.log(securedVault1.getBalance());
         // console.log(user.balance);
         // assert(securedVault1.getBalance() == 0);
