@@ -1,102 +1,103 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSimulateContract, useContractRead, useAccount, useBalance, useReadContract, useWriteContract } from 'wagmi'
+import { useAccount, useBalance, useReadContract, useWriteContract } from 'wagmi'
 import { parseEther, formatEther } from 'viem'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { toast } from 'sonner
-import  stakingPoolABI  from '../../contractData/StakingPool'
+import { toast } from 'sonner'
+import stakingPoolABI from '../../contractData/StakingPool'
 
+const STAKING_POOL_ADDRESS = '0x9b87EfDFcB734243E483f447d73EccC128023839' as const
 
-const stakingPoolAddress = '0x9b87EfDFcB734243E483f447d73EccC128023839'
+// Type for the userStakes return value
+type UserStake = {
+  amount: bigint;
+  rewardDebt: bigint;
+  lastStakeTime: bigint;
+}
 
 export function StakingPool() {
   const [stakeAmount, setStakeAmount] = useState('')
   const [withdrawAmount, setWithdrawAmount] = useState('')
+  
   const { address } = useAccount()
-  const { data: ethBalance } = useBalance({ address })
+  const { data: ethBalance } = useBalance({ 
+    address: address as `0x${string}` 
+  })
 
   const { data: totalStaked } = useReadContract({
-    address: stakingPoolAddress,
+    address: STAKING_POOL_ADDRESS,
     abi: stakingPoolABI,
-    functionName: 'totalStaked',
+    functionName: 'totalStaked'
   })
 
-  const { data: stakedAmount, refetch: refetchStakedAmount } = useReadContract({
-    address: stakingPoolAddress,
+  const { data: userStake } = useReadContract({
+    address: STAKING_POOL_ADDRESS,
     abi: stakingPoolABI,
-    functionName: 'totalStaked',
-  })
+    functionName: 'userStakes',
+    args: address ? [address] : undefined
+  }) as { data: UserStake }
 
-  const { data: rewards, refetch: refetchRewards } = useReadContract({
-    address: stakingPoolAddress,
-    abi: stakingPoolABI,
-    functionName: 'getRewards',
-  })
+  const { writeContract: withdraw, isPending: isWithdrawing } = useWriteContract()
+  const { writeContract: claimRewards, isPending: isClaiming } = useWriteContract()
 
-  const { data: stakeConfig } = useWriteContract({
-    address: stakingPoolAddress,
-    abi: stakingPoolABI,
-    functionName: 'stake',
-    value: stakeAmount ? parseEther(stakeAmount) : undefined,
-  })
-
-  const { data: stake, isPending: isStaking } = useWriteContract({
-    address: stakingPoolAddress,
-    abi: stakingPoolABI,
-    functionName: 'stake',
-    value: stakeAmount ? parseEther(stakeAmount) : undefined,
-  })
-  const { data: withdrawData, isPending: isWithdrawingData } = useWriteContract({
-    abi: stakingPoolABI,
-    functionName: 'withdraw',
-    args: [withdrawAmount ? parseEther(withdrawAmount) : BigInt(0)],
-  })
-
-  const { data: withdraw, isPending: isWithdrawing } = useWriteContract({
-    address: stakingPoolAddress,
-    abi: stakingPoolABI,
-    functionName: 'withdraw',
-    args: [withdrawAmount ? parseEther(withdrawAmount) : BigInt(0)],
-  })
-
-  const { data: claimRewards, isPending: isClaiming } = useWriteContract({
-    address: stakingPoolAddress,
-    abi: stakingPoolABI,
-    functionName: 'claimRewards',
-    functionName: 'claimRewards',
-  })
-
-  const { data: claimRewards, isPending: isClaiming } = useWriteContract(claimRewardsConfig)
-
-  const handleStake = (e: React.FormEvent) => {
+  const handleStake = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!stake) return
-    stake()
+    if (!stakeAmount || !address || !withdraw) return
+    
+    try {
+      await withdraw({
+        address: STAKING_POOL_ADDRESS,
+        abi: stakingPoolABI,
+        value: parseEther(stakeAmount)
+      })
+      toast.success('Staking transaction sent')
+    } catch (error) {
+      toast.error('Staking failed')
+      console.error(error)
+    }
   }
 
-  const handleWithdraw = (e: React.FormEvent) => {
+  const handleWithdraw = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!withdraw) return
-    withdraw()
+    if (!withdrawAmount || !withdraw) return
+
+    try {
+      await withdraw({
+        address: STAKING_POOL_ADDRESS,
+        abi: stakingPoolABI,
+        functionName: 'withdraw',
+        args: [parseEther(withdrawAmount)]
+      })
+      toast.success('Withdrawal request sent')
+    } catch (error) {
+      toast.error('Withdrawal failed')
+      console.error(error)
+    }
   }
 
-  const handleClaimRewards = () => {
-    if (!claimRewards) return
-    claimRewards()
+  const handleClaimRewards = async () => {
+    if (!claimRewards || !address) return
+
+    try {
+      await claimRewards({
+        address: STAKING_POOL_ADDRESS,
+        abi: stakingPoolABI,
+        functionName: 'claimRewards'
+      })
+      toast.success('Claim request sent')
+    } catch (error) {
+      toast.error('Claim failed')
+      console.error(error)
+    }
   }
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refetchStakedAmount()
-      refetchRewards()
-    }, 15000) // Refresh every 15 seconds
-
-    return () => clearInterval(interval)
-  }, [refetchStakedAmount, refetchRewards])
+  // Safely get values from userStake
+  const stakedAmount = userStake?.amount ?? BigInt(0)
+  const rewards = userStake?.rewardDebt ?? BigInt(0)
 
   return (
     <Card>
@@ -105,8 +106,8 @@ export function StakingPool() {
       </CardHeader>
       <CardContent className="space-y-4">
         <p>Total Staked: {totalStaked ? formatEther(totalStaked) : '0'} ETH</p>
-        <p>Your Staked Amount: {stakedAmount ? formatEther(stakedAmount) : '0'} ETH</p>
-        <p>Your Rewards: {rewards ? formatEther(rewards) : '0'} ETH</p>
+        <p>Your Staked Amount: {formatEther(stakedAmount)} ETH</p>
+        <p>Your Rewards: {formatEther(rewards)} ETH</p>
         <p>Your ETH Balance: {ethBalance ? formatEther(ethBalance.value) : '0'} ETH</p>
 
         <form onSubmit={handleStake} className="space-y-2">
@@ -116,13 +117,13 @@ export function StakingPool() {
             value={stakeAmount}
             onChange={(e) => setStakeAmount(e.target.value)}
             type="number"
-            step="0.01"
+            step="0.000001"
             min="0"
             max={ethBalance ? formatEther(ethBalance.value) : '0'}
             required
           />
-          <Button type="submit" disabled={isStaking}>
-            {isStaking ? 'Staking...' : 'Stake'}
+          <Button type="submit">
+            Stake ETH
           </Button>
         </form>
 
@@ -133,9 +134,9 @@ export function StakingPool() {
             value={withdrawAmount}
             onChange={(e) => setWithdrawAmount(e.target.value)}
             type="number"
-            step="0.01"
+            step="0.000000001"
             min="0"
-            max={stakedAmount ? formatEther(stakedAmount) : '0'}
+            max={formatEther(stakedAmount)}
             required
           />
           <Button type="submit" disabled={isWithdrawing}>
@@ -143,7 +144,10 @@ export function StakingPool() {
           </Button>
         </form>
 
-        <Button onClick={handleClaimRewards} disabled={isClaiming || !rewards || rewards === BigInt(0)}>
+        <Button 
+          onClick={handleClaimRewards} 
+          disabled={isClaiming || rewards === BigInt(0)}
+        >
           {isClaiming ? 'Claiming...' : 'Claim Rewards'}
         </Button>
       </CardContent>

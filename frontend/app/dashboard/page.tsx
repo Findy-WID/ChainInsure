@@ -14,6 +14,7 @@ import { SecuredVault } from "@/components/contract/SecuredVault";
 import { PolicyDetails } from "@/components/contract/Policy/PolicyDetail";
 import { CreatePolicy } from "@/components/contract/Policy/CreatePolicy";
 import { useState } from "react";
+import { StakingPool } from "@/components/contract/StakingPool";
 
 function Dashboard () {
 
@@ -46,13 +47,11 @@ function Dashboard () {
                 <div className="p-6">
                     <DashboardCards/>
                     <DashboardTable/>
-                    {activeSection === 'vault' && <VaultManager />}
-                    {activeSection === 'insurance' && <CreatePolicy />}
-                    {/* <VaultManager /> */}
-                    {/* <PolicyDetails /> */}
-                    {/* <CreatePolicy /> */}
-                    {/* <SecuredVault /> */}
-                    {/* <Home/> */}
+                    {/* {activeSection === 'vault' && <VaultManager />}
+                    {activeSection === 'insurance' && <CreatePolicy />} */}
+
+                    <CreatePolicy />
+
                 </div>
             </div>
            
@@ -63,7 +62,7 @@ function Dashboard () {
 
            
             {/* Modal */}
-            {modalOpen && activeSection === 'vault' && (
+            {/* {modalOpen && activeSection === 'vault' && (
               <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
                 <div className="bg-white p-6 rounded-lg shadow-lg w-96">
                   <div className="flex justify-between items-center mb-4">
@@ -71,18 +70,16 @@ function Dashboard () {
                     <button onClick={handleModalClose} className="text-red-500">X</button>
                   </div>
                   
-                  {/* Render VaultManager in the modal */}
                   <VaultManager />
 
                 </div>
               </div>
-            )}
+            )} */}
+            
         </div>
     )
 }
 
 export default Dashboard
-
-
 
 

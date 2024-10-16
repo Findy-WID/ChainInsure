@@ -1,19 +1,51 @@
-// 'use client'
+'use client'
 
-// import { useContractWrite, usePrepareContractWrite } from 'wagmi'
-// import { Button } from '@/components/ui/button'
-// import { insuranceManagerABI } from '@/contractABI/insuranceManagerABI'
-// ;
-// export function ClaimPolicy() {
-//   const { config } = usePrepareContractWrite({
-//     address: '0x...',  // Replace with your contract address
-//     abi: insuranceManagerABI,
-//     functionName: 'claimPolicy',
-//   })
+import { useWriteContract } from 'wagmi'
+import { Button } from '@/components/ui/button'
+import InsuranceManagerABI from '../../../contractData/InsuranceManager';
+import { toast } from 'sonner'
+import { useState } from 'react'
 
-//   const { write } = useContractWrite(config)
+const contractAddress = '0x51045De164CEB24f866fb788650748aEC8370769';
 
-//   return (
-//     <Button onClick={() => write?.()}>Claim Policy</Button>
-//   )
-// }
+export function ClaimPolicy() {
+  const { writeContract, isPending, isSuccess, isError } = useWriteContract()
+  const [isClaimPending, setIsClaimPending] = useState(false)
+
+  const handleClaimPolicy = async () => {
+    setIsClaimPending(true)
+    try {
+      await writeContract({
+        address: contractAddress,
+        abi: InsuranceManagerABI,
+        functionName: 'claimPolicy',
+      })
+      
+      // If the function reaches this point without throwing an error, we consider it a success
+      toast.success('Policy claim request sent.')
+    } catch (error) {
+      console.error('Error claiming policy:', error)
+      toast.error('Failed to claim policy.')
+    } finally {
+      setIsClaimPending(false)
+    }
+  }
+
+  // Provide feedback on success or error after writing the contract
+  if (isSuccess) {
+    toast.success('Policy claimed successfully!')
+  }
+  if (isError) {
+    toast.error('Error claiming policy.')
+  }
+
+
+  return (
+    <Button 
+      onClick={handleClaimPolicy} 
+      disabled={isPending || isClaimPending}
+    >
+      {isPending || isClaimPending ? 'Claiming...' : 'Claim Policy'}
+    </Button>
+  )
+}

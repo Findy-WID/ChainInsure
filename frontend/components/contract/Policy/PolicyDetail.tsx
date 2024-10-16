@@ -1,25 +1,37 @@
 'use client'
+
 import { useReadContract } from 'wagmi'
 import InsuranceManagerABI from '../../../contractData/InsuranceManager';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { formatEther } from 'viem'
 
-const contractAddress = '0x6D0ceF6a337bF944bc4E002b91D445dE6E28aD08'
+const contractAddress = '0x51045De164CEB24f866fb788650748aEC8370769'
+
+interface PolicyData {
+  id: bigint;
+  owner: `0x${string}`;
+  coverageAmount: bigint;
+  premium: bigint;
+  period: bigint;
+  startTime: bigint;
+  active: boolean;
+  status: number;
+}
 
 export function PolicyDetails({ address }: { address: `0x${string}` }) {
-  const { data, isError, isLoading } = useReadContract({
+  const { data, isError, isPending } = useReadContract({
+    address: contractAddress,
+    abi: InsuranceManagerABI,
+    functionName: 'getPolicy',
+    args: [address],
+  }) as { data: PolicyData | undefined, isError: boolean, isPending: boolean }
 
-        address: contractAddress,
-        abi: InsuranceManagerABI,
-        functionName: 'getPolicy',
-        args: [address],
-  })
-
-  if (isLoading) return <div>Loading...</div>
+  if (isPending) return <div>Loading...</div>
   if (isError) return <div>Error fetching policy details</div>
 
-  const policy = data?.[0] as { id: bigint; owner: `0x${string}`; coverageAmount: bigint; premium: bigint; period: bigint; startTime: bigint; active: boolean; status: number; }
+  if (!data) return <div className='text-2xl text-green-700'>No policy found</div>
 
-  if (!policy) return <div className='text-2xl text-green-700'>No policy found</div>
+  const statusMap = ['Pending', 'Approved', 'Rejected', 'Claimed']
 
   return (
     <Card>
@@ -27,16 +39,14 @@ export function PolicyDetails({ address }: { address: `0x${string}` }) {
         <CardTitle className='bg-orange-700'>Your Policy</CardTitle>
       </CardHeader>
       <CardContent>
-        <p>Coverage Amount: {policy.coverageAmount?.toString()} ETH</p>
-        <p>Premium: {policy.premium?.toString()} ETH</p>
-        <p>Period: {policy.period?.toString()} days</p>
-        <p>Status: {['Pending', 'Approved', 'Rejected', 'Claimed'][policy.status]}</p>
-        <p>Active: {policy.active ? 'Yes' : 'No'}</p>
+        <p>Coverage Amount: {formatEther(data.coverageAmount)} ETH</p>
+        <p>Premium: {formatEther(data.premium)} ETH</p>
+        <p>Period: {data.period.toString()} days</p>
+        <p>Status: {statusMap[data.status] || 'Unknown'}</p>
+        <p>Active: {data.active ? 'Yes' : 'No'}</p>
       </CardContent>
     </Card>
   )
 }
-
-
 
 // staking contract
