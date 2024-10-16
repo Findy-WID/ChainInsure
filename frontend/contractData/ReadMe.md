@@ -77,9 +77,9 @@ function checkPolicyValidity(address _user) public view returns (bool)
 
 ---
 
-# **Manager Staking**
+# **Manager Vault**
 
-The **Manager Staking** contract allows users to create secured vaults, manage funds, and track vault balances.
+The **Manager Vault** contract allows users to create secured vaults, manage funds, and track vault balances.
 
 ### **1. createVault**  
 ```solidity
