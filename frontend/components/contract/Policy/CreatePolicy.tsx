@@ -495,3 +495,6 @@ export function CreatePolicy() {
     </form>
   );
 }
+
+
+// add a getpremium function to the contract

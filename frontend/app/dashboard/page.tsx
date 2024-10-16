@@ -15,6 +15,7 @@ import { PolicyDetails } from "@/components/contract/Policy/PolicyDetail";
 import { CreatePolicy } from "@/components/contract/Policy/CreatePolicy";
 import { useState } from "react";
 import { StakingPool } from "@/components/contract/StakingPool";
+import { EyeOff, ScanEye, ScanEyeIcon } from "lucide-react";
 
 function Dashboard () {
 
