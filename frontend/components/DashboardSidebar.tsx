@@ -1,6 +1,7 @@
 import React from 'react'
 import Image from 'next/image'
-import { LayoutDashboard, CircleStop, House, MapPin, Phone} from 'lucide-react'
+import { LayoutDashboard, CircleStop, House, MapPin, Phone, Vault, ShieldCheck} from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { ModalWrapper } from '@/components/ui/ModalWrapper/Index';
 import { StakingPool } from '@/components/contract/StakingPool';
 import { ClaimPolicy } from '@/components/contract/Policy/ClaimPolicy';
@@ -13,12 +14,12 @@ const navLinks = [
         icon:<LayoutDashboard/>, text:'Dashboard', section:'dashboard'
     },
     {
-        icon: <CircleStop />,
+        icon: <ShieldCheck />,
         text: 'Insurance', 
         section:'insurance',
     },
     {
-        icon:<CircleStop/>,
+        icon:<Vault />,
         text:'Vault',
         section:'vault',
     },
@@ -36,6 +37,8 @@ const navLinks = [
 ]
 
 export function DashboardSidebar({ onButtonClick }: { onButtonClick: (section: string) => void }) {
+
+    const router = useRouter()
 
     const renderNavItem = (item: typeof navLinks[0], index: number) => {
         const buttonContent = (
@@ -80,7 +83,15 @@ export function DashboardSidebar({ onButtonClick }: { onButtonClick: (section: s
               children={<VaultManager />}
             />
           );
-        } else {
+        }
+        else if (item.section === 'home') {
+            return (
+              <div key={index} onClick={() => router.push('/')}> 
+                {buttonContent}
+              </div>
+            );
+          }
+        else {
           return (
             <div key={index} onClick={() => onButtonClick(item.section)}>
               {buttonContent}
@@ -91,7 +102,7 @@ export function DashboardSidebar({ onButtonClick }: { onButtonClick: (section: s
       
   
   return (
-    <aside className="w-64 h-screen bg-[#0C0E1A] text-white flex flex-col justify-between p-6 space-y-2 font-sans">
+    <aside className="w-64 min-h-screen bg-[#0C0E1A] text-white flex flex-col justify-between p-6 space-y-2 font-sans">
         
             {/*Logo */}
             <div className="mb-6 w-full flex items-center justify-center mt-2">
@@ -100,9 +111,9 @@ export function DashboardSidebar({ onButtonClick }: { onButtonClick: (section: s
 
             {/*nav */}
 
-             <nav>
-        {navLinks.map(renderNavItem)}
-      </nav>
+            <nav>
+                {navLinks.map(renderNavItem)}
+            </nav>
 
             {/* Contact Information */}
             <div className="p-6">

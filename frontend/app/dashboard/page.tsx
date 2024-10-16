@@ -31,12 +31,12 @@ function Dashboard () {
 
   const handleButtonClick = (section: string) => {
     setActiveSection(section)
-    setModalOpen(true) // Open the modal when a button is clicked
+    setModalOpen(true)
   }
 
-  const handleModalClose = () => {
-    setModalOpen(false)
-  }
+  // const handleModalClose = () => {
+  //   setModalOpen(false)
+  // }
 
     return (
         <div className="flex">
@@ -50,15 +50,16 @@ function Dashboard () {
                     {/* {activeSection === 'vault' && <VaultManager />}
                     {activeSection === 'insurance' && <CreatePolicy />} */}
 
-                    <CreatePolicy />
+                    {/* <CreatePolicy /> */}
 
                 </div>
             </div>
            
            {/*Wallet section */}
-           <div className=''>
-                <DashboardWallet/>
-           </div>
+           <DashboardWallet/>
+           {/* <div className='min-h-screen'>
+               
+           </div> */}
 
            
             {/* Modal */}

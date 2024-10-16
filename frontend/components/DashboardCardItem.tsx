@@ -2,8 +2,8 @@ import React from 'react'
 
 interface CardProps{
     title: string;
-    value: number;
-    total:number;
+    value: number | string;
+    total:number | string;
 }
 
 export function DashboardCardItem({title, value, total}:CardProps) {
