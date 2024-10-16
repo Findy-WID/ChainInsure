@@ -178,7 +178,7 @@ contract InsuranceManager {
      * @notice Approve the policy after verifying no suspicious behavior or hack
      * @dev Integrates with the SecuredVault's `reportHack` function to check for hacks or account freezing
      */
-    function _approvePolicy(SecuredVault securedVault_, Policy memory policy_) public returns (uint256) {
+    function approvePolicy(SecuredVault securedVault_, Policy memory policy_) public returns (uint256) {
         // Call `reportHack` from the SecuredVault contract to detect any hacks
         (bool isFrozen, uint256 fundsLost) = securedVault_.reportHack();
 
