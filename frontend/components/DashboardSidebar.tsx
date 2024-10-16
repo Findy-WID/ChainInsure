@@ -1,33 +1,95 @@
 import React from 'react'
 import Image from 'next/image'
 import { LayoutDashboard, CircleStop, House, MapPin, Phone} from 'lucide-react'
+import { ModalWrapper } from '@/components/ui/ModalWrapper/Index';
+import { StakingPool } from '@/components/contract/StakingPool';
+import { ClaimPolicy } from '@/components/contract/Policy/ClaimPolicy';
+import { CreatePolicy } from '@/components/contract/Policy/CreatePolicy';
+import VaultManager from './contract/VaultManager';
 
 
 const navLinks = [
     {
-        icon:<LayoutDashboard/>, text:'Dashboard'
+        icon:<LayoutDashboard/>, text:'Dashboard', section:'dashboard'
     },
     {
         icon: <CircleStop />,
-        text: 'Insurance'
+        text: 'Insurance', 
+        section:'insurance',
     },
     {
         icon:<CircleStop/>,
-        text:'Vault'
+        text:'Vault',
+        section:'vault',
     },
     {
         icon:<CircleStop/>,
-        text:'Staking'
+        text:'Staking',
+        section:'staking',
     },
     {
         icon:<House />,
-        text:'Home'
+        text:'Home',
+        section:'home'
     },
     
 ]
 
-export function DashboardSidebar() {
-    
+export function DashboardSidebar({ onButtonClick }: { onButtonClick: (section: string) => void }) {
+
+    const renderNavItem = (item: typeof navLinks[0], index: number) => {
+        const buttonContent = (
+          <button className='pl-6 mb-4 w-full text-left'>
+            <ul>
+              <li className="flex items-center space-x-4">
+                {item.icon}
+                <span>{item.text}</span>
+              </li>
+            </ul>
+          </button>
+        );
+      
+        if (item.section === 'staking') {
+          return (
+            <ModalWrapper
+              key={index}
+              triggerElement={buttonContent}
+              title="Staking"
+              content={<StakingPool />}
+              children={<StakingPool />}
+            />
+          );
+        } else if (item.section === 'insurance') {
+          return (
+            <ModalWrapper
+              key={index}
+              triggerElement={buttonContent}
+              title="Insurance Claims"
+              content={<CreatePolicy />}
+              children={<CreatePolicy />}
+            />
+          );
+        } else if (item.section === 'vault') {
+          // Add the Vault modal case
+          return (
+            <ModalWrapper
+              key={index}
+              triggerElement={buttonContent}
+              title="Vault Wallet"
+              content={<VaultManager />}
+              children={<VaultManager />}
+            />
+          );
+        } else {
+          return (
+            <div key={index} onClick={() => onButtonClick(item.section)}>
+              {buttonContent}
+            </div>
+          );
+        }
+      };
+      
+  
   return (
     <aside className="w-64 h-screen bg-[#0C0E1A] text-white flex flex-col justify-between p-6 space-y-2 font-sans">
         
@@ -38,20 +100,9 @@ export function DashboardSidebar() {
 
             {/*nav */}
 
-            <nav>
-                {navLinks.map((item, index)=>{
-                    return (
-                        <button key={index}className='pl-6 mb-4'>
-                            <ul>
-                            <li className="flex     items-center space-x-4">
-                            {item.icon}
-                            <span>{item.text}</span>
-                            </li>
-                            </ul>
-                        </button>
-                    )
-                })}
-            </nav>
+             <nav>
+        {navLinks.map(renderNavItem)}
+      </nav>
 
             {/* Contact Information */}
             <div className="p-6">
@@ -65,3 +116,9 @@ export function DashboardSidebar() {
     </aside>
   )
 }
+
+
+
+
+
+
