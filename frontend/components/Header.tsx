@@ -20,8 +20,7 @@ import {
   WalletDropdownDisconnect,
 } from "@coinbase/onchainkit/wallet";
 import { useRouter } from "next/navigation";
-import { Basenames } from "./wallet/Basename";
-import LoginButton from "./LoginButton";
+// import LoginButton from "./login_button/LoginButton";
 
 export function Header() {
   const { isConnected } = useAccount();
@@ -29,11 +28,6 @@ export function Header() {
   const { disconnect } = useDisconnect();
   const [isScrolled, setIsScrolled] = useState(false);
   const router = useRouter();
-
-
-  const { address } = useAccount();
-  const account = useAccount();
-
 
   useEffect(() => {
     const handleScroll = () => {
@@ -74,15 +68,12 @@ export function Header() {
 
       <div className="flex items-center space-x-4">
       <div className="flex justify-between bg-[#1E1E33] rounded-md">
-      <div className="flex items-center gap-3">
-            {!address && <LoginButton />} {/*Connect wallet button*/}
-            {account.status === 'connected' && (
-              <div>
-                <Basenames address={account.addresses?.[0]} />
-              </div>
-            )}
-            {/* <h1>{result}</h1> */}
-          </div>
+        <Wallet>
+          <ConnectWallet>
+            <Avatar className="h-6 w-6" />
+            <Name />
+          </ConnectWallet>
+        </Wallet>
       </div>
       {/* <LoginButton /> */}
 
