@@ -8,7 +8,7 @@ export function DashboardWallet() {
   const { address } = useAccount();
 
   return (
-    <aside className="bg-[#0C0E1A] p-6 text-white pt-32 w-64 min-h-screen">
+    <aside className="bg-[#0C0E1A] p-6 text-white md:pt-32 md:h-full">
       <h3 className="text-lg font-semibold">My Wallet</h3>
       <p className="text-3xl font-bold my-4">
         25,874 <span className="text-sm">ETH</span>

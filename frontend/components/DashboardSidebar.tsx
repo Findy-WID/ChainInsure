@@ -1,12 +1,14 @@
 import React from 'react'
 import Image from 'next/image'
-import { LayoutDashboard, CircleStop, House, MapPin, Phone, Vault, ShieldCheck} from 'lucide-react'
+import { LayoutDashboard, CircleStop, House, MapPin, Phone, Vault, ShieldCheck, Menu, X} from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { ModalWrapper } from '@/components/ui/ModalWrapper/Index';
 import { StakingPool } from '@/components/contract/StakingPool';
 import { ClaimPolicy } from '@/components/contract/Policy/ClaimPolicy';
 import { CreatePolicy } from '@/components/contract/Policy/CreatePolicy';
 import VaultManager from './contract/VaultManager';
+import { useState } from 'react';
+import { DashboardWallet } from './DashboardWallet';
 
 
 const navLinks = [
@@ -36,9 +38,15 @@ const navLinks = [
     
 ]
 
-export function DashboardSidebar({ onButtonClick }: { onButtonClick: (section: string) => void }) {
+export function DashboardSidebar({ onButtonClick, isOpen }: { onButtonClick: (section: string) => void , isOpen:boolean}) {
 
     const router = useRouter()
+    // const [isOpen, setIsOpen] = useState<boolean>(false)
+
+
+    // const toggleSidebar = () => {
+    //   setIsOpen(!isOpen)
+    // }
 
     const renderNavItem = (item: typeof navLinks[0], index: number) => {
         const buttonContent = (
@@ -102,29 +110,45 @@ export function DashboardSidebar({ onButtonClick }: { onButtonClick: (section: s
       
   
   return (
-    <aside className="w-64 min-h-screen bg-[#0C0E1A] text-white flex flex-col justify-between p-6 space-y-2 font-sans">
+    <>
+      {/* Hamburger Menu for Mobile */}
+      {/* <button
+        className="text-white md:hidden p-4 absolute top:20 z-20"
+        onClick={toggleSidebar}
+      >
+        {isOpen ? <X /> : <Menu />}
+      </button> */}
+
+      <aside className={`min-h-screen bg-[#0C0E1A] text-white flex flex-col px-6 pt-6 space-y-8 font-sans absolute md:relative transition-transform transform ${
+        isOpen ? 'translate-x-0' : '-translate-x-full'
+      } md:translate-x-0`}>
         
-            {/*Logo */}
-            <div className="mb-6 w-full flex items-center justify-center mt-2">
-                <Image src='/images/logo-white.svg' alt='logo' width={100} height={50}/>
-            </div>
+        {/*Logo */}
+        <div className="w-full flex items-center justify-center mt-2">
+            <Image src='/images/logo-white.svg' alt='logo' width={100} height={50}/>
+        </div>
 
-            {/*nav */}
 
-            <nav>
-                {navLinks.map(renderNavItem)}
-            </nav>
+        {/*nav */}
+        <nav>
+            {navLinks.map(renderNavItem)}
+        </nav>
 
-            {/* Contact Information */}
-            <div className="p-6">
+        <div className="md:hidden">
+          <DashboardWallet/>
+        </div>
 
-                <p className="text-sm">Contact Us</p>
-                <p className="text-sm mt-2 flex items-center"><MapPin className='w-4 h-4 mr-2'/>Location ipsum</p>
-                <p className="text-sm mt-1 flex items-center whitespace-nowrap"><Phone className='w-4 h-4 mr-2'/> Phone number ipsum</p>
-            </div>
+        {/* Contact Information */}
+        <div className="p-6">
 
-        
-    </aside>
+            <p className="text-sm">Contact Us</p>
+            <p className="text-sm mt-2 flex items-center"><MapPin className='w-4 h-4 mr-2'/>Location ipsum</p>
+            <p className="text-sm mt-1 flex items-center whitespace-nowrap"><Phone className='w-4 h-4 mr-2'/> Phone number ipsum</p>
+        </div>
+
+    
+      </aside>
+    </>
   )
 }
 

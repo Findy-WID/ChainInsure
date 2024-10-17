@@ -31,8 +31,8 @@ export function Faqs() {
   ];
 
   return (
-    <section className="bg-[#F1F1F3] p-20">
-      <div className="flex justify-between">
+    <section className="bg-[#F1F1F3] p-10 md:p-20">
+      <div className="flex flex-col w-full md:flex-row justify-between">
         <h2 className="text-3xl font-serif font-bold text-[#302B63] mb-8">FAQs</h2>
         <div>
           {faqData.map((faq, index) => (

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useWriteContract, useReadContract } from 'wagmi'
 import { toast } from 'sonner'
+import { Eye, EyeOff, ScanEye } from 'lucide-react'
 
 
 import securedVaultABI from '../../contractData/SecuredVault'
@@ -18,6 +19,7 @@ const MANAGER_CONTRACT_ADDRESS = '0x8690c9e8329aeEB65bB5ad299fD4B6d67882C05D'
 export default function SetSecret() {
     const {writeContract, isPending} = useWriteContract()
     const [secret, setSecret] = useState('')
+    const [showSecret, setShowSecret] = useState(false)
 
     // const {data:vaultAddress, error, isPending} = useReadContract({
     //   address:MANAGER_CONTRACT_ADDRESS,
@@ -59,12 +61,18 @@ export default function SetSecret() {
         <CardContent>
            <form  onSubmit={handleCreateSecret} className="space-y-4">
             <Label htmlFor="secret">Secret</Label>
+            <div className="flex">
             <Input id="secret"
               value={secret}
               onChange={(e) => setSecret(e.target.value)}
-              type="password"
+              type={showSecret ? 'text' : 'password'}
               placeholder='Enter a new secret'
               required/>
+            
+            <Button type='button' className='ml-2' onClick={()=>setShowSecret(!showSecret)}>
+              {showSecret ? <EyeOff size={20} /> : <ScanEye size={20} />}
+            </Button>
+            </div>
             
             <Button type="submit" disabled={isPending}>
               {isPending ? 'Creating...' : 'Create'}

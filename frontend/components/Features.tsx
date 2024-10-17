@@ -20,10 +20,10 @@ export function Features() {
       <article className="container w-5/6 mx-auto">
 
         {/*first container */}
-        <div className="flex flex-col md:flex-row mb-6 justify-between space-x-4">
+        <div className="flex flex-col md:flex-row mb-6 justify-between md:space-x-4 space-y-6 md:space-y-0">
 
           {/*cta feature */}
-          <div className='bg-[#0B0C16] py-20 px-6 rounded-xl shadow-md w-2/5 transition duration-300 ease-in-out transform hover:scale-105'>
+          <div className='bg-[#0B0C16] py-5 md:py-20 px-6 rounded-xl shadow-md md:w-2/5 transition duration-300 ease-in-out transform hover:scale-105'>
             <h1 className="text-white tracking-wide leading-loose text-2xl font-sans font-bold mb-4 ">Get insured against hacks, wallet draining and malicious activities</h1>
             
             {isConnected ? (
@@ -41,11 +41,11 @@ export function Features() {
           </div>
 
           {/*assets feature */}
-          <div className='bg-white flex space-x-8 items-center p-6 rounded-xl shadow-md w-3/5 transition duration-300 ease-in-out transform hover:scale-105'>
+          <div className='bg-white flex flex-col md:flex-row md:space-x-8 items-center p-6 rounded-xl shadow-md w-full md:w-3/5 transition duration-300 ease-in-out transform hover:scale-105'>
             <Image src="/images/assets.svg" alt="assets-image" 
             height={150}
             width={120}
-            className='h-36 w-28'/>
+            className='h-28 w-full mb-2 md:mb-0 md:h-36 md:w-28'/>
             <div>
               <h1 className="text-2xl font-bold font-serif text-[#302B63] tracking wide mb-4">Secure your assets</h1>
               <p className="text-gray-600">
@@ -56,11 +56,11 @@ export function Features() {
         </div>
         
         {/*second container */}
-        <div className='flex flex-col md:flex-row mb-2 justify-between space-x-4 '>
+        <div className='flex flex-col md:flex-row mb-2 justify-between space-y-6 md:space-y-0 md:space-x-4 '>
 
           {/*vaults feature */}
-          <div className='flex flex-row bg-white px-6 py-20 rounded-lg shadow-md w-3/5 relative transition duration-300 ease-in-out transform hover:scale-105'>
-              <div className='w-3/5 pt-20 absolute bottom-20'>
+          <div className='flex flex-row bg-white px-6 py-5 md:py-20 rounded-lg shadow-md w-full md:w-3/5 md:relative transition duration-300 ease-in-out transform hover:scale-105'>
+              <div className='md:w-3/5 pt-20 md:absolute bottom-20'>
                 <h1 className="text-2xl font-bold font-serif text-[#302B63] tracking wide mb-4">Manage your vault</h1>
                 <p className="text-gray-600">
                 Create a vault and safe guard your assets with real time information and notifications.
@@ -73,10 +73,10 @@ export function Features() {
             </div>
 
             {/*Pools feature */}
-            <div className='flex flex-col px-6 py-20 space-y-10 bg-white rounded-lg shadow-md w-2/5 transition duration-300 ease-in-out transform hover:scale-105'>
+            <div className='flex flex-col px-6 py-5 md:py-20 space-y-6 md:space-y-10 bg-white rounded-lg shadow-md md:w-2/5 transition duration-300 ease-in-out transform hover:scale-105'>
                 <Image src='/images/pool.svg'  alt='pool-image' height={96}
                 width={150}
-                className='h-20 w-32'/>
+                className='w-full h-32 md:h-20 md:w-32'/>
 
 
                 <div>

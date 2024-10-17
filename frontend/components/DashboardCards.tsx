@@ -43,7 +43,7 @@ export function DashboardCards () {
     const stakedAmount = userStake?.amount ?? BigInt(0)
 
     return (
-        <article className="grid grid-cols-3 p-6 gap-6">
+        <article className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <DashboardCardItem title="Total Amount Staked" value={`${formatEther(stakedAmount)} ETH`} total={totalStaked ? `${formatEther(totalStaked)} ETH` : '0 ETH'} />
             <DashboardCardItem title="My Vault Balance" value={vaultBalance ? `${formatEther(vaultBalance)} ETH` : '0 ETH'} total={`${50149} ETH`} />
             <DashboardCardItem title="Total Withdrawable" value={17} total={6285} />

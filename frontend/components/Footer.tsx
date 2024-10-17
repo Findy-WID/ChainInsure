@@ -11,15 +11,15 @@ const icons = [
 export function Footer () {
   return (
     <footer className="bg-[#0C0E1A] text-white pt-12">
-      <div className="flex flex-col md:flex-row justify-between mx-auto px-8">
+      <div className="flex flex-col md:flex-row space-y-6 justify-between mx-auto px-8">
         <div className="flex flex-col space-y-4 ">
           <h1 className="text-3xl">Chain Insure</h1>
-          <p className="text-sm w-2/5 text-[#ACACB8]">
+          <p className="text-sm w-full md:w-2/5 text-[#ACACB8]">
           A base platform providing onchain insurance for digital assets against wallet hacks and staking on ETH/USDT  liquidity pools to earn high APY
           </p>
         </div>
 
-        <nav className="flex justify-between space-x-10">
+        <nav className="flex justify-between md:space-x-10">
           <div className='flex flex-col space-y-2'>
             <h1 className="text-xl">Company</h1>
             <a href="#" className="text-[#ACACB8] hover:text-blue-400">Documentation</a>
@@ -44,8 +44,8 @@ export function Footer () {
           </div>
         </nav>
       </div>
-      <div className='flex flex-row justify-between items-center mx-auto px-8 mt-16 border-b border-1 border-[#4D4F6F] pb-6'>
-        <p className="text-sm text-left text-[#ACACB8] ">Copyright 2024 ChainInsure All Rights Reserved</p>
+      <div className='flex flex-col-reverse space-y-4 md:space-y-0 md:flex-row justify-between items-center mx-auto px-8 mt-16 border-b border-1 border-[#4D4F6F] pb-6'>
+        <p className="text-sm text-left text-[#ACACB8] mt-6">Copyright 2024 ChainInsure All Rights Reserved</p>
 
         <div className="flex flex-row space-x-4 text-right">
           {icons.map((icon, index)=>{
