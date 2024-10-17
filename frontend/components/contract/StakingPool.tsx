@@ -199,22 +199,32 @@ export function StakingPool() {
   const { writeContract: withdraw, isPending: isWithdrawing } = useWriteContract();
   const { writeContract: claimRewards, isPending: isClaiming } = useWriteContract();
 
-  const handleStake = async (e: React.FormEvent) => {
+  const handleStake = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!stakeAmount || !address || !withdraw) return;
-
+  
+    // Validate inputs
+    if (!stakeAmount || !address) {
+      toast.error("Please enter a stake amount and connect your wallet.");
+      return;
+    }
+  
     try {
-      // Ensure stakeAmount is parsed correctly
-      const valueToSend = parseEther(stakeAmount); // This should return a bigint
+      // Parse stake amount to wei and convert to string
+      const valueToSend = parseEther(stakeAmount).toString();
+  
+      // Call the correct staking contract function
       await withdraw({
         address: STAKING_POOL_ADDRESS,
         abi: stakingPoolABI,
-        value: valueToSend as unknown as bigint // Type assertion
+        functionName: 'withdraw', 
+        args: [BigInt(valueToSend)] 
       });
-      toast.success('Staking transaction sent');
+  
+  
+      toast.success("Staking transaction sent");
     } catch (error) {
-      toast.error('Staking failed');
-      console.error(error);
+      toast.error("Staking failed");
+      console.error("Staking error:", error);
     }
   };
 
