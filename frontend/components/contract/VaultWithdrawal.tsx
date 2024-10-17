@@ -18,16 +18,16 @@ import managerABI from '../../contractData/Manager'
 const MANAGER_CONTRACT_ADDRESS = '0x8690c9e8329aeEB65bB5ad299fD4B6d67882C05D'
 
 
-type UserStake = {
-    amount: bigint;
-    rewardDebt: bigint;
-    lastStakeTime: bigint;
-  }
+// type UserStake = {
+//     amount: bigint;
+//     rewardDebt: bigint;
+//     lastStakeTime: bigint;
+//   }
 
 export default function VaultWithdrawal() {
 
     const { writeContract: withdraw, isPending: isWithdrawing } = useWriteContract()
-    const [withdrawAmount, setWithdrawAmount] = useState('')
+    const [withdrawAmount, setWithdrawAmount] = useState('0')
     const [withdrawAddress, setWithdrawAddress] = useState('')
 
     const { address } = useAccount();
@@ -46,10 +46,17 @@ export default function VaultWithdrawal() {
       args: [address] as any,
     });
 
+    const userVaultBalance = vaultBalance ?? BigInt(0)
+
 
     const handleWithdraw = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!withdrawAddress || !withdrawAmount || !withdraw) return
+
+        if(parseEther(withdrawAmount) > userVaultBalance){
+          toast.error(`The withdrwal amount must be less than or equal to  ${formatEther(userVaultBalance)}`)
+          return;
+        }
     
         try {
           await withdraw({
@@ -65,7 +72,8 @@ export default function VaultWithdrawal() {
         }
     }
 
-    const userVaultBalance = vaultBalance ?? BigInt(0)
+    
+    console.log(`user vault balance: ${formatEther(userVaultBalance)}`)
 
   return (
     <Card>

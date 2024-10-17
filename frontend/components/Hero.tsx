@@ -21,7 +21,7 @@ export function Hero() {
         />
       </div>
       <div className="container pt-60 pb-20 z-10 mx-auto px-4 text-center">
-        <h1 className="text-white text-5xl font-bold mb-6">Enjoy real time wallet monitoring,
+        <h1 className="text-white text-3xl md:text-4xl lg:5xl font-bold mb-6">Enjoy real time wallet monitoring,
         and hassle free protection.</h1>
         <p className="text-white text-xl mb-8">Create a vault that protects your assets from malicious hacks
         and easily stake your assets in ETH/USDT pools for guaranteed rewards.</p>

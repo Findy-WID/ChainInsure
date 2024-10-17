@@ -18,7 +18,7 @@ export default function Home() {
         <Hero />
         {/* <Features /> */}
         {/* <SwapComponents /> */}
-        <Cta/>
+        {/* <Cta/> */}
         <FramePage />
         <Features />
         <Info/>

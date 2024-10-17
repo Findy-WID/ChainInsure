@@ -9,9 +9,9 @@ const tableData = [
 
 export function DashboardTable() {
   return (
-    <div className="bg-blue-500 p-6 rounded-lg text-white">
-        <table className="w-full text-left">
-            <thead className="bg-[#1F2C46]">
+    <div className="bg-blue-500 p-2 lg:p-4 mt-4 rounded-lg text-white w-full">
+        <table className="w-full text-left text-sm lg:text-lg p-2">
+            <thead className="bg-[#1F2C46] rounded-md">
                 <tr>
                     <th>No</th>
                     <th>Player</th>
