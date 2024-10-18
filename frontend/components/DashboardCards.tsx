@@ -22,7 +22,7 @@ export function DashboardCards () {
         address: STAKING_POOL_ADDRESS,
         abi: stakingPoolABI,
         functionName: 'totalStaked'
-      })
+    })
 
 
 
@@ -38,14 +38,15 @@ export function DashboardCards () {
         abi: managerABI,
         functionName: 'getVaultBalance',
         args: [address] as any,
-      });
+    });
 
+    console.log(vaultBalance)
     const stakedAmount = userStake?.amount ?? BigInt(0)
 
     return (
         <article className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <DashboardCardItem title="Total Amount Staked" value={`${formatEther(stakedAmount)} ETH`} total={totalStaked ? `${formatEther(totalStaked)} ETH` : '0 ETH'} />
-            <DashboardCardItem title="My Vault Balance" value={vaultBalance ? `${formatEther(vaultBalance)} ETH` : '0 ETH'} total={`${50149} ETH`} />
+            <DashboardCardItem title="Your Vault Balance" value={vaultBalance ? `${formatEther(vaultBalance)} ETH` : '0 ETH'} total={`${50149} ETH`} />
             <DashboardCardItem title="Total Withdrawable" value={17} total={6285} />
         </article>
         
