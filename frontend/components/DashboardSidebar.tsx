@@ -38,7 +38,7 @@ const navLinks = [
     
 ]
 
-export function DashboardSidebar({ onButtonClick, isOpen }: { onButtonClick: (section: string) => void , isOpen:boolean}) {
+export function DashboardSidebar({ onButtonClick, isOpen, handleModalClose }: { onButtonClick: (section: string) => void , isOpen:boolean, handleModalClose: ()=>void}) {
 
     const router = useRouter()
     // const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -50,7 +50,7 @@ export function DashboardSidebar({ onButtonClick, isOpen }: { onButtonClick: (se
 
     const renderNavItem = (item: typeof navLinks[0], index: number) => {
         const buttonContent = (
-          <button className='pl-6 mb-4 w-full text-left'>
+          <button className='pl-6 mb-4 w-full text-left hover:text-blue-500'>
             <ul>
               <li className="flex items-center space-x-4">
                 {item.icon}
@@ -135,7 +135,7 @@ export function DashboardSidebar({ onButtonClick, isOpen }: { onButtonClick: (se
         </nav>
 
         <div className="md:hidden">
-          <DashboardWallet/>
+          <DashboardWallet handleModalClose={handleModalClose}/>
         </div>
 
         {/* Contact Information */}

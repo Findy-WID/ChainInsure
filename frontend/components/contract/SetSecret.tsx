@@ -21,6 +21,9 @@ export default function SetSecret() {
     const [secret, setSecret] = useState('')
     const [showSecret, setShowSecret] = useState(false)
 
+    //to do
+    //setSecret not working
+
     // const {data:vaultAddress, error, isPending} = useReadContract({
     //   address:MANAGER_CONTRACT_ADDRESS,
     //   abi:managerABI,

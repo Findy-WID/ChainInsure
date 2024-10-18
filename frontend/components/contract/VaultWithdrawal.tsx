@@ -24,7 +24,10 @@ const MANAGER_CONTRACT_ADDRESS = '0x8690c9e8329aeEB65bB5ad299fD4B6d67882C05D'
 //     lastStakeTime: bigint;
 //   }
 
-export default function VaultWithdrawal() {
+
+//todo 
+//withdrawal doing 
+export default function VaultWithdrawal({handleModalClose}:{handleModalClose: ()=>void}) {
 
     const { writeContract: withdraw, isPending: isWithdrawing } = useWriteContract()
     const [withdrawAmount, setWithdrawAmount] = useState('0')
@@ -60,12 +63,13 @@ export default function VaultWithdrawal() {
     
         try {
           await withdraw({
-            address: vaultAddress ?? MANAGER_CONTRACT_ADDRESS,
+            address: vaultAddress as `0x${string}`,
             abi: securedVaultABI,
             functionName: 'sendFunds',
             args: [withdrawAddress, parseEther(withdrawAmount)] as any
           })
           toast.success('Withdrawal request sent')
+          handleModalClose()
         } catch (error) {
           toast.error('Withdrawal failed')
           console.error(error)
