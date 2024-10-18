@@ -399,10 +399,155 @@
 // }
 
 
-'use client';
+// 'use client';
+
+// import { useState, useEffect } from 'react';
+// import { useAccount, useWriteContract, useReadContract } from 'wagmi';
+// import { parseEther } from 'viem';
+// import { Button } from '@/components/ui/button';
+// import { Input } from '@/components/ui/input';
+// import { Label } from '@/components/ui/label';
+// import { toast } from 'sonner';
+// import insuranceManagerABI from '@/contractData/InsuranceManager';
+
+// const contractAddress = '0x51045De164CEB24f866fb788650748aEC8370769';
+// const MIN_VALUE = parseEther('0.000001');
+// const MAX_VALUE = parseEther('1000000');
+
+// export function CreatePolicy() {
+//   const [coverageAmount, setCoverageAmount] = useState('');
+//   const [period, setPeriod] = useState('');
+//   const { address } = useAccount();
+//   const [premium, setPremium] = useState<bigint | undefined>(undefined); 
+
+
+//   const { data: contractState } = useReadContract({
+//     address: contractAddress,
+//     abi: insuranceManagerABI,
+//     functionName: 'checkPolicyValidity', 
+//   });
+
+//   const { writeContract, isPending, isSuccess, isError } = useWriteContract();
+
+//   const handleSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+
+//     const coverageEther = parseEther(coverageAmount || '0');
+//     if (coverageEther < MIN_VALUE || coverageEther > MAX_VALUE) {
+//       toast.error('Coverage amount must be between 0.000001 ETH and 1,000,000 ETH');
+//       return;
+//     }
+
+//     try {
+//       if (createPolicy) {
+//         const { hash } = await createPolicy();
+//         toast.success('Transaction sent successfully: ' + hash);
+//       }
+//     } catch (error) {
+//       console.error('Error creating policy:', error);
+//       toast.error('Transaction failed.');
+//     }
+//   };
+
+//   // const handleSubmit = async (e: React.FormEvent) => {
+//   //   e.preventDefault();
+
+//   //   const coverageEther = parseEther(coverageAmount || '0');
+//   //   if (coverageEther < MIN_VALUE || coverageEther > MAX_VALUE) {
+//   //     toast.error('Coverage amount must be between 0.000001 ETH and 1,000,000 ETH');
+//   //     return;
+//   //   }
+
+//   //   try {
+//   //     await writeContract({
+//   //       address: contractAddress,
+//   //       abi: insuranceManagerABI,
+//   //       functionName: 'createPolicy',
+//   //       args: [
+//   //         parseEther(coverageAmount || '0'),
+//   //         period ? BigInt(period) : BigInt(0),
+//   //       ],
+//   //     });
+//   //     toast.success('Transaction sent successfully.');
+//   //   } catch (error) {
+//   //     console.error('Error creating policy:', error);
+//   //     toast.error('Transaction failed.');
+//   //   }
+//   // };
+
+//   const { write: createPolicy } = useWriteContract(createPolicyConfig);
+
+//   const { data: premiumData } = useReadContract({
+//     address: contractAddress,
+//     abi: insuranceManagerABI,
+//     functionName: 'getPremiumFee',
+//     args: [parseEther(coverageAmount || '0'), period ? BigInt(period) : BigInt(0)],
+//   });
+
+//   useEffect(() => {
+//     if (premiumData) {
+//       setPremium(premiumData as bigint);
+//     }
+//   }, [premiumData]);
+
+//   useEffect(() => {
+//     if (createPolicyError) {
+//       toast.error(createPolicyError.message);
+//     }
+//   }, [createPolicyError]);
+
+
+//   useEffect(() => {
+//     if (isSuccess) {
+//       toast.success('Policy created successfully!');
+//     }
+//     if (isError) {
+//       toast.error('Error creating policy.');
+//     }
+//   }, [isSuccess, isError]);
+
+//   return (
+//     <form onSubmit={handleSubmit} className="space-y-4 p-8">
+//       {address && <p>Connected account: {address}</p>}
+//       <div>
+//         <Label htmlFor="coverageAmount">Coverage Amount (ETH)</Label>
+//         <Input
+//           id="coverageAmount"
+//           value={coverageAmount}
+//           onChange={(e) => setCoverageAmount(e.target.value)}
+//           type="number"
+//           step="0.000001"
+//           min="0.000001"
+//           max="1000000"
+//           required
+//         />
+//       </div>
+//       <div>
+//         <Label htmlFor="period">Period (days)</Label>
+//         <Input
+//           id="period"
+//           value={period}
+//           onChange={(e) => setPeriod(e.target.value)}
+//           type="number"
+//           min="1"
+//           required
+//         />
+//       </div>
+//       <Button type="submit" disabled={isPending}>
+//         {isPending ? 'Creating Policy...' : 'Create Policy'}
+//       </Button>
+//     </form>
+//   );
+// }
+
+
+
+
+
+
 
 import { useState, useEffect } from 'react';
-import { useAccount, useWriteContract, useReadContract } from 'wagmi';
+import { useAccount, useWriteContract, useReadContract, usePrepareContractWrite } from 'wagmi';
 import { parseEther } from 'viem';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -417,15 +562,39 @@ const MAX_VALUE = parseEther('1000000');
 export function CreatePolicy() {
   const [coverageAmount, setCoverageAmount] = useState('');
   const [period, setPeriod] = useState('');
+  const [premium, setPremium] = useState<bigint | undefined>(undefined);
   const { address } = useAccount();
 
-  const { data: contractState } = useReadContract({
+  const { config: createPolicyConfig, error: createPolicyError } = usePrepareContractWrite({
     address: contractAddress,
     abi: insuranceManagerABI,
-    functionName: 'checkPolicyValidity', 
+    functionName: 'createPolicy',
+    args: [parseEther(coverageAmount || '0'), period ? BigInt(period) : BigInt(0)],
+    overrides: {
+      value: premium,
+    },
   });
 
-  const { writeContract, isPending, isSuccess, isError } = useWriteContract();
+  const { data: createPolicy, isPending } = useWriteContract(createPolicyConfig);
+
+  const { data: premiumData } = useReadContract({
+    address: contractAddress,
+    abi: insuranceManagerABI,
+    functionName: 'getPremiumFee',
+    args: [parseEther(coverageAmount || '0'), period ? BigInt(period) : BigInt(0)],
+  });
+
+  useEffect(() => {
+    if (premiumData) {
+      setPremium(premiumData as bigint);
+    }
+  }, [premiumData]);
+
+  useEffect(() => {
+    if (createPolicyError) {
+      toast.error(createPolicyError.message);
+    }
+  }, [createPolicyError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -437,30 +606,15 @@ export function CreatePolicy() {
     }
 
     try {
-      await writeContract({
-        address: contractAddress,
-        abi: insuranceManagerABI,
-        functionName: 'createPolicy',
-        args: [
-          parseEther(coverageAmount || '0'),
-          period ? BigInt(period) : BigInt(0),
-        ],
-      });
-      toast.success('Transaction sent successfully.');
+      if (createPolicy) {
+        const { hash } = await createPolicy();
+        toast.success('Transaction sent successfully: ' + hash);
+      }
     } catch (error) {
       console.error('Error creating policy:', error);
       toast.error('Transaction failed.');
     }
   };
-
-  useEffect(() => {
-    if (isSuccess) {
-      toast.success('Policy created successfully!');
-    }
-    if (isError) {
-      toast.error('Error creating policy.');
-    }
-  }, [isSuccess, isError]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-8">
@@ -495,6 +649,3 @@ export function CreatePolicy() {
     </form>
   );
 }
-
-
-// add a getpremium function to the contract
