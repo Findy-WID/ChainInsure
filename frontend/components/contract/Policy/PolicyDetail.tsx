@@ -19,6 +19,11 @@ interface PolicyData {
 }
 
 export function PolicyDetails({ address }: { address: `0x${string}` }) {
+
+  const secondsToDays = (seconds: bigint) => {
+    return (Number(seconds) / (24 * 60 * 60)).toFixed(2)
+  }
+
   const { data, isError, isPending } = useReadContract({
     address: contractAddress,
     abi: InsuranceManagerABI,
@@ -36,17 +41,15 @@ export function PolicyDetails({ address }: { address: `0x${string}` }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className='bg-orange-700'>Your Policy</CardTitle>
+        <CardTitle className=''>Your Policy</CardTitle>
       </CardHeader>
       <CardContent>
         <p>Coverage Amount: {formatEther(data.coverageAmount)} ETH</p>
         <p>Premium: {formatEther(data.premium)} ETH</p>
-        <p>Period: {data.period.toString()} days</p>
+        <p>Period: {secondsToDays(data.period)} days</p>
         <p>Status: {statusMap[data.status] || 'Unknown'}</p>
         <p>Active: {data.active ? 'Yes' : 'No'}</p>
       </CardContent>
     </Card>
   )
 }
-
-// staking contract
