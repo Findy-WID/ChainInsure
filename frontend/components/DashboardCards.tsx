@@ -26,12 +26,20 @@ export function DashboardCards () {
 
 
 
+    // const { data: userStake } = useReadContract({
+    //     address: STAKING_POOL_ADDRESS,
+    //     abi: stakingPoolABI,
+    //     functionName: 'userStakes',
+    //     args: address ? [address] : undefined
+    // }) as { data: UserStake }
+
     const { data: userStake } = useReadContract({
         address: STAKING_POOL_ADDRESS,
         abi: stakingPoolABI,
-        functionName: 'userStakes',
-        args: address ? [address] : undefined
-    }) as { data: UserStake }
+        functionName: "userStakes",
+        args: [address] as any,
+      });
+    
 
     const { data: vaultBalance } = useReadContract({
         address: MANAGER_CONTRACT_ADDRESS,
@@ -41,13 +49,14 @@ export function DashboardCards () {
     });
 
     // console.log(vaultBalance)
-    const stakedAmount = userStake?.amount ?? BigInt(0)
+    const rewardAmount = userStake ? userStake[1] : BigInt(0); // rewardDebt is second element
+    const stakedAmount =  userStake ? userStake[0] : BigInt(0); // amount is first element
 
     return (
         <article className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <DashboardCardItem title="Total Amount Staked" value={`${formatEther(stakedAmount)} ETH`} total={totalStaked ? `${formatEther(totalStaked)} ETH` : '0 ETH'} />
-            <DashboardCardItem title="Your Vault Balance" value={vaultBalance ? `${formatEther(vaultBalance)} ETH` : '0 ETH'} total={`${50149} ETH`} />
-            <DashboardCardItem title="Total Withdrawable" value={17} total={6285} />
+            <DashboardCardItem title="Your Vault Balance" value={vaultBalance ? `${formatEther(vaultBalance)} ETH` : '0 ETH'} total={`${50} ETH`} />
+            <DashboardCardItem title="Total Staking Rewards" value={`${formatEther(rewardAmount)} ETH`} total={`${formatEther(stakedAmount)} ETH`} />
         </article>
         
     )
