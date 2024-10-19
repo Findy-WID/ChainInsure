@@ -14,9 +14,9 @@ export function ModalWrapper({ children, triggerElement, title, content }: Modal
       <DialogTrigger asChild>
         {triggerElement}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[725px] max-h-[90%] overflow-y-scroll">
+      <DialogContent className="sm:max-w-[725px] w-screen max-h-[90%] overflow-y-scroll">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle className='w-fit'>{title}</DialogTitle>
         </DialogHeader>
         {content}
       </DialogContent>

@@ -134,7 +134,7 @@ export function SecuredVault({ vaultAddress, userAddress }: { vaultAddress: `0x$
         <CardTitle>Manage Your Secured Vault</CardTitle>
       </CardHeader>
       <CardContent>
-        <p>Vault Address: {vaultAddress}</p>
+                      <p className='[@media(max-width:996px)]:truncate [@media(max-width:996px)]:w-[70%]'>Vault Address: {vaultAddress}</p>
         <p>Balance: {vaultBalance ? formatEther(vaultBalance) : '0'} ETH</p>
         <p>Account Status: {accountStatus ? 'Frozen' : 'Active'}</p>
 
