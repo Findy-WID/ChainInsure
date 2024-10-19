@@ -8,13 +8,13 @@ import { DashboardWallet } from "@/components/DashboardWallet"
 import { useAccount } from 'wagmi'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-import Home from "@/components/contract/Policy/page";
+
 import VaultManager from "@/components/contract/VaultManager";
 import { SecuredVault } from "@/components/contract/SecuredVault";
 import { PolicyDetails } from "@/components/contract/Policy/PolicyDetail";
 import { CreatePolicy } from "@/components/contract/Policy/CreatePolicy";
 import { useState } from "react";
-import { StakingPool } from "@/components/contract/StakingPool";
+
 import { EyeOff, ScanEye, ScanEyeIcon } from "lucide-react";
 
 function Dashboard () {
@@ -41,13 +41,13 @@ function Dashboard () {
     setModalOpen(true)
   }
 
-  // const handleModalClose = () => {
-  //   setModalOpen(false)
-  // }
+  const handleModalClose = () => {
+    setModalOpen(false)
+  }
 
     return (
         <div className="grid grid-row md:grid-cols-4 md:flex-row w-full">
-            <DashboardSidebar onButtonClick={handleButtonClick} isOpen={isOpen}/>
+            <DashboardSidebar onButtonClick={handleButtonClick} isOpen={isOpen} handleModalClose={handleModalClose}/>
             {/*Main Content */}
             <div className="bg-[#121A2F] w-full md:col-span-2">
                 <DashboardTopbar toggleSidebar={toggleSidebar} isOpen={isOpen}/>
@@ -64,7 +64,7 @@ function Dashboard () {
            
            {/*Wallet section */}
            <div className="hidden md:block md:min-h-screen">
-           <DashboardWallet/>
+           <DashboardWallet handleModalClose={handleModalClose}/>
            </div>
           
                
