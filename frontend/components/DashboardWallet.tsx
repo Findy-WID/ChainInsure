@@ -70,14 +70,14 @@ export function DashboardWallet({handleModalClose}:{handleModalClose: () => void
       
 
       {/*Set secret modal  */}
-      <ModalWrapper triggerElement={<button className="bg-green-500 w-full py-2 rounded-full mt-4 capitalize">update vault secret</button>} title="Set Secret" content={<SetSecret/>} children={<SetSecret/>}/>
+      <ModalWrapper triggerElement={<button className="bg-green-500 w-full py-2 rounded-full mt-4 capitalize hover:bg-green-600">update vault secret</button>} title="Set Secret" content={<SetSecret/>} children={<SetSecret/>}/>
       
 
       {/* Withdrawal Modal*/}
       <ModalWrapper
         triggerElement={
-          <button className="bg-blue-500 w-full py-2 rounded-full mt-4">
-            Withdraw
+          <button className="bg-blue-500 w-full py-2 rounded-full mt-4 capitalize hover:bg-blue-600">
+            Withdraw from Vault
           </button>
         }
         title="Withdraw Funds"
