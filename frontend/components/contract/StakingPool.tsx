@@ -127,8 +127,8 @@ export default function StakingPool() {
   const displayBalance = balance ? formatEther(balance.value) : "0";
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen w-[80%] bg-gray-100 p-8">
+      <div className="w-2xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-2">Staking Pool</h1>
@@ -150,7 +150,7 @@ export default function StakingPool() {
               <p>Connecting...</p>
             ) : (
               <div className="space-y-2">
-                <p className="text-sm">Connected: {address}</p>
+                <p className="text-sm truncate">Connected: {address}</p>
                 <p className="text-sm">Balance: {displayBalance} ETH</p>
               </div>
             )}
