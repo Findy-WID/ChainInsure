@@ -4,7 +4,8 @@ import { useAccount, useReadContract } from 'wagmi'
 import { CreatePolicy } from './CreatePolicy'
 import { ClaimPolicy } from './ClaimPolicy'
 import { CancelPolicy } from './CancelPolicy'
-import managerABI from '../../../contractData/Manager';
+import managerABI from '@/contractData/Manager'
+import { Card } from '@/components/ui/card'
 import { PolicyDetails } from './PolicyDetail'
 
 const MANAGER_CONTRACT_ADDRESS = '0x8690c9e8329aeEB65bB5ad299fD4B6d67882C05D'
@@ -20,18 +21,25 @@ export function InsuranceManager() {
   })
 
   if (!address) {
-    return <div>Please connect your wallet</div>
+    return <div className="text-center p-4">Please connect your wallet</div>
   }
 
   return (
-    <div>
+    <div className="max-w-2xl mx-auto p-4 space-y-6">
       <CreatePolicy />
-      <PolicyDetails address={address} />
-      <div className="flex flex-col gap-4 my-8">
-
-      {vaultAddress && <ClaimPolicy vaultAddress={vaultAddress as `0x${string}`} />}
-      <CancelPolicy />
+      
+      <div className="my-8">
+        <PolicyDetails address={address} />
       </div>
+      
+      <Card className="p-4">
+        <div className="flex flex-col gap-4">
+          {vaultAddress && (
+            <ClaimPolicy vaultAddress={vaultAddress as `0x${string}`} />
+          )}
+          <CancelPolicy address={address} />
+        </div>
+      </Card>
     </div>
   )
 }

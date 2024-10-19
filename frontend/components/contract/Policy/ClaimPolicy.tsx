@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react'
@@ -24,7 +25,7 @@ export function ClaimPolicy({ vaultAddress }: { vaultAddress: `0x${string}` }) {
       toast.success('Policy claim request sent.')
     } catch (error) {
       console.error('Error claiming policy:', error)
-      toast.error('Failed to claim policy.')
+      toast.error(' Claim Policy failed Try Again Later.')
     } finally {
       setIsClaimPending(false)
     }
