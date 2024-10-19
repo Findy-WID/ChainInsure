@@ -42,7 +42,7 @@ export function DashboardWallet({handleModalClose}:{handleModalClose: () => void
         <p className="text-3xl font-bold mb-4">
           {ethBalance ? Number(formatEther(ethBalance.value)).toFixed(3) : '0'} <span className="text-sm">ETH</span>
         </p>
-        <div className="space-y-2 text-left pl-2">
+        <div className="space-y-2 text-left px-2">
           <div className="flex items-center space-x-2">
             {vaultAddress ? (
               <div className="flex items-center space-x-2 bg-[#1A233B] text-white px-4 py-2 rounded-lg">
@@ -70,7 +70,7 @@ export function DashboardWallet({handleModalClose}:{handleModalClose: () => void
       
 
       {/*Set secret modal  */}
-      <ModalWrapper triggerElement={<button className="bg-green-500 w-full py-2 rounded-full mt-4 capitalize">set vault secret</button>} title="Set Secret" content={<SetSecret/>} children={<SetSecret/>}/>
+      <ModalWrapper triggerElement={<button className="bg-green-500 w-full py-2 rounded-full mt-4 capitalize">update vault secret</button>} title="Set Secret" content={<SetSecret/>} children={<SetSecret/>}/>
       
 
       {/* Withdrawal Modal*/}

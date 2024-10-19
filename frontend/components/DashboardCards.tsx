@@ -40,7 +40,7 @@ export function DashboardCards () {
         args: [address] as any,
     });
 
-    console.log(vaultBalance)
+    // console.log(vaultBalance)
     const stakedAmount = userStake?.amount ?? BigInt(0)
 
     return (

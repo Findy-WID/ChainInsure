@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { useAccount, useBalance, useReadContract, useWriteContract } from 'wagmi'
+import { useAccount, useBalance, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { parseEther, formatEther } from 'viem'
 import { toast } from 'sonner'
 
@@ -29,7 +29,10 @@ const MANAGER_CONTRACT_ADDRESS = '0x8690c9e8329aeEB65bB5ad299fD4B6d67882C05D'
 //withdrawal doing 
 export default function VaultWithdrawal({handleModalClose}:{handleModalClose: ()=>void}) {
 
-    const { writeContract: withdraw, isPending: isWithdrawing } = useWriteContract()
+    
+    const {data:hash, isPending:isWithdrawing, writeContractAsync:withdraw} = useWriteContract()
+    const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash,})
+
     const [withdrawAmount, setWithdrawAmount] = useState('0')
     const [withdrawAddress, setWithdrawAddress] = useState('')
 
@@ -40,7 +43,7 @@ export default function VaultWithdrawal({handleModalClose}:{handleModalClose: ()
       abi:managerABI,
       functionName:'getVaultAddress',
       args:[address] as any
-        })
+    })
 
     const { data: vaultBalance } = useReadContract({
       address: MANAGER_CONTRACT_ADDRESS,
@@ -48,6 +51,11 @@ export default function VaultWithdrawal({handleModalClose}:{handleModalClose: ()
       functionName: 'getVaultBalance',
       args: [address] as any,
     });
+
+
+    // console.log(vaultAddress)
+
+    
 
     const userVaultBalance = vaultBalance ?? BigInt(0)
 
@@ -62,22 +70,43 @@ export default function VaultWithdrawal({handleModalClose}:{handleModalClose: ()
         }
     
         try {
+
+          if (!withdraw) {
+            throw new Error('Withdrawal function is unavailable');
+          }
+
           await withdraw({
             address: vaultAddress as `0x${string}`,
             abi: securedVaultABI,
             functionName: 'sendFunds',
             args: [withdrawAddress, parseEther(withdrawAmount)] as any
           })
+
           toast.success('Withdrawal request sent')
-          handleModalClose()
+
+          
         } catch (error) {
           toast.error('Withdrawal failed')
           console.error(error)
         }
     }
 
-    
-    console.log(`user vault balance: ${formatEther(userVaultBalance)}`)
+  
+    useEffect(() => {
+      if (isConfirmed) {
+        toast.success('Withdrawal successful');
+  
+        // Set a timeout to close the modal after 5 seconds
+        const timeoutId = setTimeout(() => {
+          handleModalClose();
+        }, 5000); // 5000ms = 5 seconds
+  
+        // Cleanup function to clear timeout if component unmounts before 5 seconds
+        return () => clearTimeout(timeoutId);
+      }
+    }, [isConfirmed, handleModalClose]);
+
+  
 
   return (
     <Card>
@@ -101,9 +130,22 @@ export default function VaultWithdrawal({handleModalClose}:{handleModalClose: ()
               max={formatEther(userVaultBalance)}
               required
             />
-            <Button type="submit" disabled={isWithdrawing}>
+            <Button type="submit" disabled={isWithdrawing || isConfirming}>
               {isWithdrawing ? 'Withdrawing...' : 'Withdraw'}
             </Button>
+            {isConfirming && (
+              <div className="p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700">
+                <p className="font-bold">Waiting for confirmation...</p>
+                <p>Your transaction is being processed. Please wait.</p>
+              </div>
+            )}
+
+            {isConfirmed && (
+              <div className="p-4 bg-green-100 border-l-4 border-green-500 text-green-700">
+                <p className="font-bold">Transaction confirmed!</p>
+                <p>Your transaction has been successfully confirmed. You can now close this page.</p>
+              </div>
+            )}
           </form>
       </CardContent>
     </Card>
