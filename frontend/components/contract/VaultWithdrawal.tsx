@@ -119,11 +119,12 @@ export default function VaultWithdrawal({handleModalClose}:{handleModalClose: ()
       </CardHeader>
 
       <CardContent>
+      <h1> Current Vault Balance : {formatEther(userVaultBalance)} ETH</h1>
       <form onSubmit={handleWithdraw} className="space-y-4">
             <Label htmlFor='withdrawAddress'>Withdrawal Address</Label>
             <Input id='withdrawAddress' value={withdrawAddress} onChange={(e) => setWithdrawAddress(e.target.value)} type='text' required/>
 
-            <Label htmlFor="withdrawAmount">Withdraw Amount (ETH)</Label>
+            <Label htmlFor="withdrawAmount" className="mt-2" >Withdraw Amount (ETH)</Label>
             <Input
               id="withdrawAmount"
               value={withdrawAmount}
@@ -133,6 +134,7 @@ export default function VaultWithdrawal({handleModalClose}:{handleModalClose: ()
               min="0"
               max={formatEther(userVaultBalance)}
               required
+              
             />
             <Button type="submit" disabled={isWithdrawing || isConfirming}>
               {isWithdrawing ? 'Withdrawing...' : 'Withdraw'}
