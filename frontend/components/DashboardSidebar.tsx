@@ -3,12 +3,13 @@ import Image from 'next/image'
 import { LayoutDashboard, CircleStop, House, MapPin, Phone, Vault, ShieldCheck, Menu, X} from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { ModalWrapper } from '@/components/ui/ModalWrapper/Index';
-import { StakingPool } from '@/components/contract/StakingPool';
 import { ClaimPolicy } from '@/components/contract/Policy/ClaimPolicy';
 import { CreatePolicy } from '@/components/contract/Policy/CreatePolicy';
 import VaultManager from './contract/VaultManager';
 import { useState } from 'react';
 import { DashboardWallet } from './DashboardWallet';
+import StakingPool from './contract/StakingPool';
+import { InsuranceManager } from './contract/Policy/page';
 
 
 const navLinks = [
@@ -67,7 +68,7 @@ export function DashboardSidebar({ onButtonClick, isOpen, handleModalClose }: { 
               triggerElement={buttonContent}
               title="Staking"
               content={<StakingPool />}
-              children={<StakingPool />}
+              // children={<StakingPool />}
             />
           );
         } else if (item.section === 'insurance') {
@@ -76,8 +77,8 @@ export function DashboardSidebar({ onButtonClick, isOpen, handleModalClose }: { 
               key={index}
               triggerElement={buttonContent}
               title="Insurance Claims"
-              content={<CreatePolicy />}
-              children={<CreatePolicy />}
+              content={<InsuranceManager />}
+              children={<InsuranceManager />}
             />
           );
         } else if (item.section === 'vault') {

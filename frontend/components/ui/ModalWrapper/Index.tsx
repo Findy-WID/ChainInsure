@@ -2,7 +2,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
 interface ModalWrapperProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   triggerElement: React.ReactNode;
   title: string;
   content: React.ReactElement;

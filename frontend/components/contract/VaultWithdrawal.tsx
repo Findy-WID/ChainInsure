@@ -1,13 +1,18 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { useAccount, useBalance, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
-import { parseEther, formatEther } from 'viem'
-import { toast } from 'sonner'
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  useAccount,
+  useBalance,
+  useReadContract,
+  useWriteContract, useWaitForTransactionReceipt,
+} from "wagmi";
+import { parseEther, formatEther } from "viem";
+import { toast } from "sonner";
 
 import securedVaultABI from '../../contractData/SecuredVault'
 import managerABI from '../../contractData/Manager'
@@ -15,8 +20,7 @@ import managerABI from '../../contractData/Manager'
 
 
 
-const MANAGER_CONTRACT_ADDRESS = '0x8690c9e8329aeEB65bB5ad299fD4B6d67882C05D'
-
+const MANAGER_CONTRACT_ADDRESS = "0x8690c9e8329aeEB65bB5ad299fD4B6d67882C05D";
 
 // type UserStake = {
 //     amount: bigint;
@@ -111,7 +115,7 @@ export default function VaultWithdrawal({handleModalClose}:{handleModalClose: ()
   return (
     <Card>
       <CardHeader>
-          <CardTitle>Withdraw Funds From Your Vault</CardTitle>
+        <CardTitle>Withdraw Funds From Your Vault</CardTitle>
       </CardHeader>
 
       <CardContent>
