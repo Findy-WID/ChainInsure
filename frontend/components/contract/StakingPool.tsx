@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState } from "react";
 import {
   useAccount,
@@ -6,6 +7,7 @@ import {
   useReadContract,
   useWriteContract,
   useWaitForTransactionReceipt,
+  useSendTransaction,
 } from "wagmi";
 import { parseEther, formatEther } from "viem";
 import { Button } from "@/components/ui/button";
@@ -18,25 +20,19 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Wallet, Coins, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
+import { Wallet, Coins, ArrowDownCircle, ArrowUpCircle, Loader2 } from "lucide-react";
 
-const STAKING_POOL_ADDRESS =
-  "0x787C1c5781Ee9aa2F4DACA98554953534DD333Fa" as const;
+const STAKING_POOL_ADDRESS = "0x787C1c5781Ee9aa2F4DACA98554953534DD333Fa" as const;
 import stakingPoolABI from "../../contractData/StakingPool";
-import { useSendTransaction } from "wagmi";
 
 export default function StakingPool() {
   const [stakeAmount, setStakeAmount] = useState<string>("");
   const [withdrawAmount, setWithdrawAmount] = useState<string>("");
   const [error, setError] = useState<string>("");
 
-  // Account & Balance hooks
   const { address, isConnecting, isDisconnected } = useAccount();
-  const { data: balance } = useBalance({
-    address: address,
-  });
+  const { data: balance } = useBalance({ address: address });
 
-  // Contract Read hooks
   const { data: totalStaked } = useReadContract({
     address: STAKING_POOL_ADDRESS,
     abi: stakingPoolABI,
@@ -50,27 +46,21 @@ export default function StakingPool() {
     args: [address] as any,
   });
 
-  // Contract Write hooks
   const { writeContract: writeStake, data: stakeHash } = useWriteContract();
-  const { writeContract: writeWithdraw, data: withdrawHash } =
-    useWriteContract();
+  const { writeContract: writeWithdraw, data: withdrawHash } = useWriteContract();
   const { writeContract: writeClaim, data: claimHash } = useWriteContract();
 
-  // Transaction Receipt hooks
-  const { isLoading: isStaking, isSuccess: stakeSuccess } =
-    useWaitForTransactionReceipt({
-      hash: stakeHash,
-    });
+  const { isLoading: isStaking, isSuccess: stakeSuccess } = useWaitForTransactionReceipt({
+    hash: stakeHash,
+  });
 
-  const { isLoading: isWithdrawing, isSuccess: withdrawSuccess } =
-    useWaitForTransactionReceipt({
-      hash: withdrawHash,
-    });
+  const { isLoading: isWithdrawing, isSuccess: withdrawSuccess } = useWaitForTransactionReceipt({
+    hash: withdrawHash,
+  });
 
-  const { isLoading: isClaiming, isSuccess: claimSuccess } =
-    useWaitForTransactionReceipt({
-      hash: claimHash,
-    });
+  const { isLoading: isClaiming, isSuccess: claimSuccess } = useWaitForTransactionReceipt({
+    hash: claimHash,
+  });
 
   const { data: hash, isPending, sendTransaction } = useSendTransaction();
 
@@ -93,7 +83,6 @@ export default function StakingPool() {
   const handleWithdraw = async () => {
     if (!withdrawAmount) return;
     setError("");
-
     try {
       await writeWithdraw({
         address: STAKING_POOL_ADDRESS,
@@ -121,17 +110,17 @@ export default function StakingPool() {
   };
 
   const isLoading = isStaking || isWithdrawing || isClaiming;
-  const stakedAmount = userStake ? userStake[0] : BigInt(0); // amount is first element
-  const rewardAmount = userStake ? userStake[1] : BigInt(0); // rewardDebt is second element
+  const stakedAmount = userStake ? userStake[0] : BigInt(0);
+  const rewardAmount = userStake ? userStake[1] : BigInt(0);
 
   const displayBalance = balance ? formatEther(balance.value) : "0";
 
   return (
-    <div className="min-h-screen w-[80%] bg-gray-100 p-8">
-      <div className="w-2xl mx-auto space-y-6">
+    <div className="min-h-screen w-full bg-gray-100 p-4 sm:p-8">
+      <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2">Staking Pool</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-2">Staking Pool</h1>
           <p className="text-gray-600">Stake your ETH and earn rewards</p>
         </div>
 
@@ -158,13 +147,13 @@ export default function StakingPool() {
         </Card>
 
         {/* Staking Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Card>
             <CardHeader>
               <CardTitle>Your Stake</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">
+              <p className="text-xl sm:text-2xl font-bold">
                 {stakedAmount ? formatEther(stakedAmount) : "0"} ETH
               </p>
             </CardContent>
@@ -175,7 +164,7 @@ export default function StakingPool() {
               <CardTitle>Your Rewards</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">
+              <p className="text-xl sm:text-2xl font-bold">
                 {rewardAmount ? formatEther(rewardAmount) : "0"} ETH
               </p>
             </CardContent>
@@ -186,7 +175,7 @@ export default function StakingPool() {
               <CardTitle>Total Staked</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">
+              <p className="text-xl sm:text-2xl font-bold">
                 {totalStaked ? formatEther(totalStaked) : "0"} ETH
               </p>
             </CardContent>
@@ -194,7 +183,7 @@ export default function StakingPool() {
         </div>
 
         {/* Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Stake */}
           <Card>
             <CardHeader>
@@ -216,16 +205,15 @@ export default function StakingPool() {
                 disabled={isLoading || isDisconnected || !stakeAmount}
                 className="w-full"
               >
-                {isStaking ? "Staking..." : "Stake"}
+                {isStaking ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Staking...
+                  </>
+                ) : (
+                  "Stake"
+                )}
               </Button>
-              {/* <button
-        onClick={handleStake}
-        disabled={isPending}
-      >
-        {isPending ? 'Staking...' : 'Stake'}
-      </button>
-      {hash && <div>Transaction Hash: {hash}</div>}
-      {error && <div>Error: {error}</div>} */}
             </CardContent>
           </Card>
 
@@ -250,7 +238,14 @@ export default function StakingPool() {
                 disabled={isLoading || isDisconnected || !withdrawAmount}
                 className="w-full"
               >
-                {isWithdrawing ? "Withdrawing..." : "Withdraw"}
+                {isWithdrawing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Withdrawing...
+                  </>
+                ) : (
+                  "Withdraw"
+                )}
               </Button>
             </CardContent>
           </Card>
@@ -275,7 +270,14 @@ export default function StakingPool() {
               }
               className="w-full"
             >
-              {isClaiming ? "Claiming..." : "Claim Rewards"}
+              {isClaiming ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Claiming...
+                </>
+              ) : (
+                "Claim Rewards"
+              )}
             </Button>
           </CardContent>
         </Card>
@@ -301,6 +303,8 @@ export default function StakingPool() {
     </div>
   );
 }
+
+
 
 // "use client";
 // import React, { useEffect, useState } from "react";

@@ -273,7 +273,3 @@ export function CancelPolicy() {
     </Button>
   );
 }
-
-// Claim Policy Component
-
-

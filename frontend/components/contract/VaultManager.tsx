@@ -1,9 +1,9 @@
-
+"use client";
 
 import { useState, useCallback } from 'react';
 import { useAccount, useWriteContract, useReadContract } from 'wagmi';
 import { formatEther, parseEther } from 'viem';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, ScanEye } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,8 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import managerABI from '../../contractData/Manager';
-import { SecuredVault } from './SecuredVault';
+import securedVaultABI from '../../contractData/SecuredVault';
+import SecuredVault from './SecuredVault';
 
 const MANAGER_CONTRACT_ADDRESS = '0x8690c9e8329aeEB65bB5ad299fD4B6d67882C05D';
 
@@ -66,76 +67,78 @@ export default function VaultManager() {
   }, [address, threshold, secret, writeContract]);
 
   return (
-    <Tabs defaultValue={vaultAddress ? "manage" : "create"} className="space-y-8">
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="create">Create Vault</TabsTrigger>
-        <TabsTrigger value="manage" disabled={!vaultAddress}>Manage Vault</TabsTrigger>
-      </TabsList>
+    <div className="container mx-auto px-4 py-8">
+      <Tabs defaultValue={vaultAddress ? "manage" : "create"} className="space-y-8">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="create">Create Vault</TabsTrigger>
+          <TabsTrigger value="manage" disabled={!vaultAddress}>Manage Vault</TabsTrigger>
+        </TabsList>
 
-      <TabsContent value="create">
-        <Card>
-          <CardHeader>
-            <CardTitle>Create New Vault</CardTitle>
-            <CardDescription>Set up a new secured vault</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="threshold">Threshold (ETH)</Label>
-              <Input
-                id="threshold"
-                type="number"
-                value={threshold}
-                onChange={(e) => setThreshold(e.target.value)}
-                placeholder="Enter threshold in ETH (0.001 - 1000)"
-                min="0.001"
-                max="1000"
-                step="0.001"
-              />
-            </div>
-            <div>
-              <Label htmlFor="secret">Secret</Label>
-              <div className="flex">
+        <TabsContent value="create">
+          <Card>
+            <CardHeader>
+              <CardTitle>Create New Vault</CardTitle>
+              <CardDescription>Set up a new secured vault</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="threshold">Threshold (ETH)</Label>
                 <Input
-                  id="secret"
-                  type={showSecret ? 'text' : 'password'}
-                  value={secret}
-                  onChange={(e) => setSecret(e.target.value)}
-                  placeholder="Enter secret"
+                  id="threshold"
+                  type="number"
+                  value={threshold}
+                  onChange={(e) => setThreshold(e.target.value)}
+                  placeholder="Enter threshold in ETH (0.001 - 1000)"
+                  min="0.001"
+                  max="1000"
+                  step="0.001"
                 />
-                <Button
-                  type="button"
-                  onClick={() => setShowSecret(!showSecret)}
-                  className="ml-2"
-                >
-                  {showSecret ? <EyeOff size={20} /> : <Eye size={20} />}
-                </Button>
               </div>
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button onClick={handleCreateVault} disabled={isLoading}>
-              {isLoading ? 'Creating...' : 'Create Vault'}
-            </Button>
-          </CardFooter>
-        </Card>
-      </TabsContent>
+              <div>
+                <Label htmlFor="secret">Secret</Label>
+                <div className="flex">
+                  <Input
+                    id="secret"
+                    type={showSecret ? 'text' : 'password'}
+                    value={secret}
+                    onChange={(e) => setSecret(e.target.value)}
+                    placeholder="Enter secret"
+                  />
+                  <Button
+                    type="button"
+                    onClick={() => setShowSecret(!showSecret)}
+                    className="ml-2"
+                  >
+                    {showSecret ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button onClick={handleCreateVault} disabled={isLoading}>
+                {isLoading ? 'Creating...' : 'Create Vault'}
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
 
-      <TabsContent value="manage">
-        {vaultAddress && (
-          <>
-            <Card className="mb-8 [@media(max-width:996px)]:w-[50%]">
-              <CardHeader>
-                <CardTitle>Vault Information</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className='[@media(max-width:996px)]:truncate [@media(max-width:996px)]:w-[70%]'>Vault Address: {vaultAddress}</p>
-                <p>Balance: {vaultBalance ? `${formatEther(vaultBalance)} ETH` : '0 ETH'}</p>
-              </CardContent>
-            </Card>
-            <SecuredVault vaultAddress={vaultAddress as `0x${string}`} userAddress={address as `0x${string}`} />
-          </>
-        )}
-      </TabsContent>
-    </Tabs>
+        <TabsContent value="manage">
+          {vaultAddress && (
+            <>
+              <Card className="mb-8">
+                <CardHeader>
+                  <CardTitle className='text-base xl:text-2xl'>Vault Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="break-all">Vault Address: {vaultAddress}</p>
+                  <p>Balance: {vaultBalance ? `${formatEther(vaultBalance)} ETH` : '0 ETH'}</p>
+                </CardContent>
+              </Card>
+              <SecuredVault vaultAddress={vaultAddress as `0x${string}`} userAddress={address as `0x${string}`} />
+            </>
+          )}
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }
